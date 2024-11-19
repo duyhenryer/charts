@@ -8,7 +8,7 @@ Helm's [documentation](https://helm.sh/docs) to get started.
 Once Helm has been set up correctly, add the repo as follows:
 
 ```sh
-helm repo add
+helm repo add duyhenryer https://duyhenryer.github.io/charts/
 ```
 
 If you had already added this repo earlier, run `helm repo update` to retrieve
@@ -17,7 +17,7 @@ the latest versions of the packages.
 To install the `cloudflared` chart:
 
 ```sh
-helm install cloudflared 
+helm install cloudflared duyhenryer/cloudflared 
 ```
 
 To uninstall the chart:
