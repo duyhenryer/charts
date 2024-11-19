@@ -1,11 +1,13 @@
-## Reference: https://github.com/helm/chart-testing-action
----
-name: Docs
+name: Helm Docs
+
 on:
   push:
-
-jobs: 
-  chart-helm-docs:
+    paths:
+      - 'charts/**'
+permissions:
+  contents: write
+jobs:
+  helm-docs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -13,17 +15,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      # - name: Set up Helm
-      #   uses: azure/setup-helm@v4.2.0
-
-      - name: Run docs-testing (helm-docs)
-        id: helm-docs
+      - name: Generate Helm docs
         run: |
           ./hack/gen-docs.sh
-          if [[ $(git diff --stat) != '' ]]; then
-            echo -e '\033[0;31mDocumentation outdated!\033[0m ❌'
-            git diff --color
-            exit 1
-          else
-            echo -e '\033[0;32mDocumentation up to date\033[0m ✔'
-          fi
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update helm documentation [skip ci]"
+          file_pattern: 'charts/**/README.md'
+          commit_user_name: duynhbot
+          commit_user_email: duynhbot@users.noreply.github.com
