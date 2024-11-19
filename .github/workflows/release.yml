@@ -1,18 +1,37 @@
-name: release
+name: Release Charts
+
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
-  release:
-    permissions:
-      contents: write
+  release-gh-pages:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Publish Helm charts
-        uses: stefanprodan/helm-gh-pages@master
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: gh-pages
-        
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3.5
+        with:
+          version: v3.9.0
+          
+      # Publish charts to gh-pages branch
+      - name: Publish charts to GitHub Pages
+        uses: helm/chart-releaser-action@v1.5.0
+        with:
+          config: .github/configs/cr.yaml
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
