@@ -2,6 +2,8 @@ name: Helm Docs
 
 on:
   push:
+    branches:
+      - main
     paths:
       - 'charts/**'
 permissions:
@@ -15,9 +17,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Generate Helm docs
+      - name: Run docs-testing
+        id: helm-docs-test
         run: |
-          ./hack/gen-docs.sh
+          ./.github/hack/gen-docs.sh
+          if [[ $(git diff --stat) != '' ]]; then
+            echo -e '\033[0;31mDocumentation needs to be updated! Please run ./.github/hack/gen-docs.sh locally and commit changes\033[0m ❌'
+            git diff --color
+            exit 1
+          else
+            echo -e '\033[0;32mDocumentation up to date\033[0m ✔'
+          fi
+
+      - name: Generate Helm docs
+        needs: helm-docs-test
+        run: |
+          ./.github/hack/gen-docs.sh
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
