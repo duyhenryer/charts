@@ -7,6 +7,16 @@ Helm's [documentation](https://helm.sh/docs) to get started.
 
 Once Helm has been set up correctly, add the repo as follows:
 
+
+For OCI Registry:
+```shell
+# create a token, login to ghcr.io with
+helm registry login ghcr.io
+
+helm pull oci://ghcr.io/duyhenryer/charts/cloudflared --version 0.2.1
+```
+
+For Helm Registry:
 ```sh
 helm repo add duyhenryer https://duyhenryer.github.io/charts/
 ```
