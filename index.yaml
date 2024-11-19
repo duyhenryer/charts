@@ -23,4 +23,15 @@ entries:
     urls:
     - https://github.com/duyhenryer/charts/releases/download/cloudflared-3.3.5/cloudflared-3.3.5.tgz
     version: 3.3.5
-generated: "2024-11-19T07:37:37.983659083Z"
+  - apiVersion: v2
+    appVersion: 2024.11.0
+    created: "2024-11-19T07:45:25.22641604Z"
+    description: Helm chart to deploy Cloudflare Tunnel
+    digest: a2f12811ab79854353d43a715d8ad85cbbdf0863e18962d9d9359e23a2d24456
+    icon: https://developers.cloudflare.com/cloudflare-one/favicon-32x32.png
+    name: cloudflared
+    type: application
+    urls:
+    - https://github.com/duyhenryer/charts/releases/download/cloudflared-0.2.1/cloudflared-0.2.1.tgz
+    version: 0.2.1
+generated: "2024-11-19T07:45:25.226424666Z"
