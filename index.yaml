@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  cloudflared:
+  - apiVersion: v2
+    appVersion: 2023.3.1
+    created: "2024-11-19T07:15:31.300296741Z"
+    description: Helm chart to deploy Cloudflare Tunnel
+    digest: 6deebdfb3633bff921a0f7754b0cc20ff96ed92f83d691f839f764df0f75e1f9
+    name: cloudflared
+    type: application
+    urls:
+    - https://github.com/duyhenryer/charts/releases/download/cloudflared-3.3.5/cloudflared-3.3.5.tgz
+    version: 3.3.5
+generated: "2024-11-19T07:15:31.300308672Z"
