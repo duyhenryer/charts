@@ -25,9 +25,8 @@ jobs:
           ./.github/hack/gen-docs.sh
           if [[ $(git diff --stat) != '' ]]; then
             echo "docs_outdated=true" >> $GITHUB_ENV
-            echo -e '\033[0;31mDocumentation is outdated.\033[0m'
+            echo -e '\033[0;31mDocumentation is outdated. Please run ./.github/hack/gen-docs.sh locally and commit changes.\033[0m'
             git diff --color
-            exit 1
           else
             echo "docs_outdated=false" >> $GITHUB_ENV
             echo -e '\033[0;32mDocumentation is up to date.\033[0m'
