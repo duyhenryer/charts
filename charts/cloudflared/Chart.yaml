@@ -22,6 +22,7 @@ appVersion: "2024.11.0"
 icon: https://developers.cloudflare.com/cloudflare-one/favicon-32x32.png
 
 home: https://github.com/duyhenryer/charts/tree/main/charts/cloudflared
+
 maintainers:
   - name: duyne
     email: hello@duyne.me
