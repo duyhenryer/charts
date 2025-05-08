@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'charts/**'
-      - 
 
 permissions:
   contents: write
