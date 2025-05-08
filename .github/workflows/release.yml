@@ -20,8 +20,8 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config --local user.email "duynhbot@users.noreply.github.com"
+          git config --local user.name "Auto Release Bot"
 
       - name: Install Helm
         uses: azure/setup-helm@v4.2.0
@@ -46,8 +46,8 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config --local user.email "duynhbot@users.noreply.github.com"
+          git config --local user.name "Auto Release Bot"
 
       - name: Install Helm
         uses: azure/setup-helm@v4.2.0
