@@ -4,6 +4,14 @@
 
 Helm chart to deploy Cloudflare Tunnel
 
+**Homepage:** <https://github.com/duyhenryer/charts/tree/main/charts/cloudflared>
+
+## Maintainers
+
+| Name | Email | Url |
+| ---- | ------ | --- |
+| duyne | <hello@duyne.me> | <https://github.com/duyhenryer> |
+
 ## Values
 
 | Key | Type | Default | Description |
