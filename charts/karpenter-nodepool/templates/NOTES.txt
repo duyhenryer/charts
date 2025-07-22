@@ -1,0 +1,28 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+{{- if .Values.nodePool }}
+NodePool resources have been created:
+{{- range $key, $value := .Values.nodePool }}
+  - {{ $key }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.ec2NodeClass }}
+EC2NodeClass resources have been created:
+{{- range $key, $value := .Values.ec2NodeClass }}
+  - {{ $key }}
+{{- end }}
+{{- end }}
+
+To verify the resources were created successfully, run:
+  kubectl get nodepools
+  kubectl get ec2nodeclasses
+
+To view detailed information about the resources:
+  kubectl describe nodepool default
+  kubectl describe ec2nodeclass default
+
+For more information about Karpenter, visit:
+  https://karpenter.sh/
