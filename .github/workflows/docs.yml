@@ -11,45 +11,38 @@ permissions:
   contents: write
 
 jobs:
-  helm-docs-test:
+  helm-docs:
     runs-on: ubuntu-latest
+    outputs:
+      docs-updated: ${{ steps.generate.outputs.docs-updated }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Run Helm Docs check
-        id: check
+      - name: Generate Helm Docs
+        id: generate
         run: |
+          echo "Running helm-docs generation..."
           ./.github/hack/gen-docs.sh
+          
           if [[ $(git diff --stat) != '' ]]; then
-            echo "docs_outdated=true" >> $GITHUB_ENV
-            echo -e '\033[0;31mDocumentation is outdated. Please run ./.github/hack/gen-docs.sh locally and commit changes.\033[0m'
-            git diff --color
+            echo "docs-updated=true" >> $GITHUB_OUTPUT
+            echo -e '\033[0;33mDocumentation needs to be updated.\033[0m'
+            git diff --name-only
           else
-            echo "docs_outdated=false" >> $GITHUB_ENV
+            echo "docs-updated=false" >> $GITHUB_OUTPUT
             echo -e '\033[0;32mDocumentation is up to date.\033[0m'
           fi
 
-  generate-docs:
-    runs-on: ubuntu-latest
-    needs: helm-docs-test
-    if: failure()
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Generate Helm Docs
+      - name: Configure Git
+        if: steps.generate.outputs.docs-updated == 'true'
         run: |
-          ./.github/hack/gen-docs.sh
+          git config --local user.email "duynhbot@users.noreply.github.com"
+          git config --local user.name "duynhbot"
 
-      - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: update helm documentation [skip ci]"
-          file_pattern: 'charts/**/README.md'
-          commit_user_name: duynhbot
-          commit_user_email: duynhbot@users.noreply.github.com
+      - name: Commit and Push changes
+        if: steps.generate.outputs.docs-updated == 'true'
+        run: |
+          git add charts/**/README.md
+          git commit -m "chore: update helm documentation [skip ci]"
+          git push
