@@ -25,10 +25,13 @@ jobs:
           echo "Running helm-docs generation..."
           ./.github/hack/gen-docs.sh
           
-          if [[ $(git diff --stat) != '' ]]; then
+          # Check for both modified and untracked files
+          git add charts/**/README.md
+          if [[ $(git diff --staged --stat) != '' ]] || [[ $(git status --porcelain | grep "README.md") != '' ]]; then
             echo "docs-updated=true" >> $GITHUB_OUTPUT
             echo -e '\033[0;33mDocumentation needs to be updated.\033[0m'
-            git diff --name-only
+            git status --porcelain | grep "README.md" || true
+            git diff --staged --name-only
           else
             echo "docs-updated=false" >> $GITHUB_OUTPUT
             echo -e '\033[0;32mDocumentation is up to date.\033[0m'
