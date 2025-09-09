@@ -20,5 +20,8 @@ maintainers:
   - name: Duy nè
     email: hello@duyne.me
     url: https://duyne.me
-    url: https://github.com/duyhenryer/charts
+
+sources:
+  - https://github.com/duyhenryer/charts
+  - https://karpenter.sh/
 
