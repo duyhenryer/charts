@@ -1,0 +1,157 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+## Overview
+
+This Helm chart simplifies the deployment of Karpenter NodePool and EC2NodeClass custom resources, which are essential for Karpenter's node provisioning and management capabilities on AWS EKS clusters.
+
+## Prerequisites
+
+- Kubernetes cluster with Karpenter installed
+- AWS EKS cluster with proper IAM roles configured
+- Helm 3.x installed
+
+## Installation
+
+### Add the Helm repository
+
+```bash
+helm repo add karpenter-nodepool https://duyhenryer.github.io/charts/
+helm repo update
+```
+
+### Install the chart
+
+```bash
+# Install with default values
+helm install my-karpenter-nodepool karpenter-nodepool/karpenter-nodepool
+
+# Install with custom values
+helm install my-karpenter-nodepool karpenter-nodepool/karpenter-nodepool -f values.yaml
+
+# Install with specific values
+helm install my-karpenter-nodepool karpenter-nodepool/karpenter-nodepool \
+  --set nodePool.default.expireAfter=24h \
+  --set nodePool.default.limits.cpu=500
+```
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+## Version Compatibility
+
+| karpenter-nodepool version | karpenter version |
+|---------------------------|-------------------|
+| 1.5.1                     | 1.5.0             |
+| 1.5.0                     | 1.5.0             |
+| 1.3.0                     | 1.3.0             |
+
+## Examples
+
+### Basic NodePool with Spot Instances
+
+```yaml
+nodePool:
+  spot:
+    nodeClassRef:
+      name: default
+    requirements:
+      - key: "karpenter.sh/capacity-type"
+        operator: In
+        values: ["spot"]
+      - key: "karpenter.k8s.aws/instance-category"
+        operator: In
+        values: ["c", "m", "r"]
+    limits:
+      cpu: 100
+      memory: 100Gi
+    expireAfter: 24h
+```
+
+### On-Demand NodePool for Critical Workloads
+
+```yaml
+nodePool:
+  ondemand:
+    nodeClassRef:
+      name: default
+    requirements:
+      - key: "karpenter.sh/capacity-type"
+        operator: In
+        values: ["on-demand"]
+      - key: "karpenter.k8s.aws/instance-generation"
+        operator: Gt
+        values: ["2"]
+    taints:
+      - key: "workload-type"
+        value: "critical"
+        effect: NoSchedule
+    limits:
+      cpu: 200
+      memory: 400Gi
+```
+
+## Upgrading
+
+```bash
+# Upgrade to a new version
+helm upgrade my-karpenter-nodepool karpenter-nodepool/karpenter-nodepool
+
+# Upgrade with custom values
+helm upgrade my-karpenter-nodepool karpenter-nodepool/karpenter-nodepool -f values.yaml
+```
+
+## Uninstalling
+
+```bash
+# Uninstall the chart
+helm uninstall my-karpenter-nodepool
+
+# Note: This will not delete the NodePool and EC2NodeClass resources
+# You may need to delete them manually if needed
+kubectl delete nodepool default
+kubectl delete ec2nodeclass default
+```
+
+## Troubleshooting
+
+### Check NodePool Status
+
+```bash
+kubectl get nodepools
+kubectl describe nodepool default
+```
+
+### Check EC2NodeClass Status
+
+```bash
+kubectl get ec2nodeclasses
+kubectl describe ec2nodeclass default
+```
+
+### Check Karpenter Logs
+
+```bash
+kubectl logs -n karpenter -l app.kubernetes.io/name=karpenter
+```
+
+### Common Issues
+
+1. **IAM Role Issues**: Ensure the IAM role has proper permissions for EC2 operations
+2. **Subnet/Security Group Issues**: Verify subnet and security group selectors are correct
+3. **AMI Issues**: Check if the specified AMI exists and is accessible
+
+{{ template "chart.homepage" . }}
+
+{{ template "chart.footer" . }}
