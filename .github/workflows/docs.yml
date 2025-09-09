@@ -17,7 +17,7 @@ jobs:
       docs-updated: ${{ steps.generate.outputs.docs-updated }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Generate Helm Docs
         id: generate
