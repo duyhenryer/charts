@@ -33,42 +33,33 @@ jobs:
       # Publish charts to gh-pages branch
       - name: Generate Release Notes
         run: |
-          # Process all charts (simple approach like VictoriaMetrics)
-          for chart_dir in charts/*/; do
-            chart_name=$(basename "$chart_dir")
-            if [ -f "$chart_dir/Chart.yaml" ]; then
+          # Process charts with CHANGELOG.md (VictoriaMetrics approach)
+          for CHANGELOG in $(find charts/*/CHANGELOG.md 2>/dev/null || echo ""); do
+            if [ -f "$CHANGELOG" ]; then
+              echo "📋 Processing $CHANGELOG"
+              
+              chart_dir="$(dirname $CHANGELOG)"
+              chart_name=$(basename "$chart_dir")
               version=$(grep '^version:' "$chart_dir/Chart.yaml" | awk '{print $2}')
-              description=$(grep '^description:' "$chart_dir/Chart.yaml" | cut -d':' -f2- | sed 's/^ *//')
               
-              echo "📋 Processing $chart_name version $version"
+              echo "📦 Chart: $chart_name version $version"
               
-              # Check if this version already has a tag (skip if exists)
-              if git tag | grep -q "^${chart_name}-${version}$"; then
-                echo "⏭️  Version $chart_name-$version already tagged, skipping"
+              # Check if version already in CHANGELOG (VictoriaMetrics logic)
+              if grep -q "^## $version$" $CHANGELOG; then
+                echo "⏭️  Version $version already in CHANGELOG, skipping"
               else
                 echo "🆕 Creating release notes for $chart_name-$version"
+                
+                # Extract release notes from CHANGELOG (from "# Next release" to next "##")
+                release_notes=$(sed -n '/^# Next release/,/^## /p' $CHANGELOG | sed -e '$d' -e '1d')
+                
                 # Create RELEASE_NOTES file
                 cat > "${chart_dir}/RELEASE_NOTES" << EOF
           # Release notes for version ${version}
           
           **Release date:** $(date '+%d %b %Y')
           
-          ## 🎉 What's New
-          
-          ${description}
-          
-          ## 📦 Installation
-          
-          ### Using Helm Repository
-          \`\`\`bash
-          helm repo add duyhenryer https://duyhenryer.github.io/charts/
-          helm install my-${chart_name} duyhenryer/${chart_name} --version ${version}
-          \`\`\`
-          
-          ### Using OCI Registry
-          \`\`\`bash
-          helm install my-${chart_name} oci://ghcr.io/duyhenryer/charts/${chart_name} --version ${version}
-          \`\`\`
+          ${release_notes}
           EOF
               fi
             fi
