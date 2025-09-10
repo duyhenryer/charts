@@ -61,6 +61,30 @@ entries:
   log-generator:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2025-09-10T15:30:52.541234311Z"
+    description: A configurable log generator for testing and benchmarking log pipelines
+    digest: 8fee9a8c2c073b5d68db79e1f9646f31d346263044732a937fccaf147b0e933e
+    home: https://duyhenryer.github.io/charts/
+    icon: https://raw.githubusercontent.com/duyhenryer/log-generator/main/docs/logo.png
+    keywords:
+    - log
+    - generator
+    - testing
+    - observability
+    maintainers:
+    - email: hello@duyne.me
+      name: Duy nè
+      url: https://duyne.me
+    name: log-generator
+    sources:
+    - https://github.com/duyhenryer/charts
+    - https://github.com/duyhenryer/log-generator
+    type: application
+    urls:
+    - https://github.com/duyhenryer/charts/releases/download/log-generator-0.1.9/log-generator-0.1.9.tgz
+    version: 0.1.9
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2025-09-10T15:06:10.748904318Z"
     description: A configurable log generator for testing and benchmarking log pipelines
     digest: 8b2b3e8d43d38229641960ff59832beb11a20366721249a1fe534b9a3826f059
@@ -189,4 +213,4 @@ entries:
     urls:
     - https://github.com/duyhenryer/charts/releases/download/log-generator-0.1.0/log-generator-0.1.0.tgz
     version: 0.1.0
-generated: "2025-09-10T15:06:10.748937279Z"
+generated: "2025-09-10T15:30:52.54126562Z"
