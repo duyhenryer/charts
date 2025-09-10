@@ -2,8 +2,7 @@ name: Release Charts
 
 on:
   push:
-    tags:
-      - '*-*.*.*'  # Matches: chartname-version (e.g., karpenter-nodepool-1.0.2, log-generator-0.1.1, etc.)
+    branches: [main]
     paths:
       - 'charts/**'
 
