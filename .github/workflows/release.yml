@@ -82,6 +82,7 @@ jobs:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
   release-oci:
+    needs: release-gh-pages
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
