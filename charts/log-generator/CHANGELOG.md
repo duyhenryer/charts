@@ -2,11 +2,16 @@
 
 - TODO
 
-## 0.1.16
+## 0.1.19
 
 **Release date:** 10 Sep 2025
 
 ![Helm: v3](https://img.shields.io/badge/Helm-v3.14%2B-informational?color=informational&logo=helm) ![AppVersion: 1.0.0](https://img.shields.io/badge/AppVersion-1.0.0-success?color=success&logo=docker)
+
+- 🎉 Successfully implement CHANGELOG.md approach
+- ✅ Fix sed command to properly extract release notes content  
+- 🚀 Professional release notes now working perfectly
+- 📦 Complete workflow automation for chart releases
 
 - 🎉 Successfully implement CHANGELOG.md approach
 - ✅ Fix sed command to properly extract release notes content  
