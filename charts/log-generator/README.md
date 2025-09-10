@@ -1,8 +1,21 @@
 # log-generator
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0](https://img.shields.io/badge/AppVersion-1.0.0-informational?style=flat-square)
 
-A Helm chart for Kubernetes
+A configurable log generator for testing and benchmarking log pipelines
+
+**Homepage:** <https://duyhenryer.github.io/charts/>
+
+## Maintainers
+
+| Name | Email | Url |
+| ---- | ------ | --- |
+| Duy nè | <hello@duyne.me> | <https://duyne.me> |
+
+## Source Code
+
+* <https://github.com/duyhenryer/charts>
+* <https://github.com/duyhenryer/log-generator>
 
 ## Values
 
