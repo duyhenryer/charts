@@ -34,14 +34,19 @@ jobs:
       - name: Generate Release Notes
         run: |
           mkdir -p .cr-release-notes
-          # Get chart name from tag (e.g., karpenter-nodepool-1.0.2 -> karpenter-nodepool)
-          tag_name=${GITHUB_REF#refs/tags/}
-          chart_name=$(echo "$tag_name" | sed 's/-[0-9].*//')
+          # Get changed charts from git diff
+          changed_charts=$(git diff --name-only $(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD | grep "^charts/" | cut -d'/' -f2 | sort -u)
           
-          chart_dir="charts/$chart_name"
-          if [ -d "$chart_dir" ] && [ -f "$chart_dir/Chart.yaml" ]; then
-            version=$(grep '^version:' "$chart_dir/Chart.yaml" | awk '{print $2}')
-            changelog=$(git log --oneline --no-merges $(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD -- "$chart_dir" | sed 's/^/- /' | head -5)
+          echo "📦 Changed charts: $changed_charts"
+          
+          for chart_name in $changed_charts; do
+            chart_dir="charts/$chart_name"
+            if [ -d "$chart_dir" ] && [ -f "$chart_dir/Chart.yaml" ]; then
+              version=$(grep '^version:' "$chart_dir/Chart.yaml" | awk '{print $2}')
+              echo "📋 Processing $chart_name version $version"
+              
+              changelog=$(git log --oneline --no-merges $(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD -- "$chart_dir" | sed 's/^/- /' | head -5)
+              echo "📝 Changelog: $changelog"
             
             cat > ".cr-release-notes/${chart_name}-${version}.md" << EOF
           # Release notes for version ${version}
@@ -65,7 +70,8 @@ jobs:
           helm install my-${chart_name} oci://ghcr.io/duyhenryer/charts/${chart_name} --version ${version}
           \`\`\`
           EOF
-          fi
+            fi
+          done
 
       - name: Publish charts to GitHub Pages
         uses: helm/chart-releaser-action@v1.7.0
@@ -97,14 +103,15 @@ jobs:
       - name: Generate charts
         run: |
           mkdir -p .cr-release-packages
-          # Get chart name from tag
-          tag_name=${GITHUB_REF#refs/tags/}
-          chart_name=$(echo "$tag_name" | sed 's/-[0-9].*//')
-          chart_dir="charts/$chart_name"
+          # Get changed charts from git diff
+          changed_charts=$(git diff --name-only $(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD | grep "^charts/" | cut -d'/' -f2 | sort -u)
           
-          if [ -d "$chart_dir" ] && [ -f "$chart_dir/Chart.yaml" ]; then
-            helm package "$chart_dir" --destination .cr-release-packages
-          fi
+          for chart_name in $changed_charts; do
+            chart_dir="charts/$chart_name"
+            if [ -d "$chart_dir" ] && [ -f "$chart_dir/Chart.yaml" ]; then
+              helm package "$chart_dir" --destination .cr-release-packages
+            fi
+          done
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
