@@ -119,4 +119,4 @@ jobs:
               break
             fi
             helm push "${pkg}" oci://ghcr.io/duyhenryer/charts
-          doneẫnh
+          done
