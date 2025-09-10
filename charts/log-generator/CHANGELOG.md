@@ -13,6 +13,11 @@
 - 🚀 Professional release notes now working perfectly
 - 📦 Complete workflow automation for chart releases
 
+- 🎉 Successfully implement CHANGELOG.md approach
+- ✅ Fix sed command to properly extract release notes content  
+- 🚀 Professional release notes now working perfectly
+- 📦 Complete workflow automation for chart releases
+
 ## 0.1.7
 
 **Release date:** 10 Sep 2025
