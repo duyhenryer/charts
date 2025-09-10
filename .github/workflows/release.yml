@@ -121,6 +121,8 @@ jobs:
             echo "No CHANGELOG.md changes to commit"
           else
             git commit -m "chore: update CHANGELOG.md files after release"
+            # Pull latest changes before pushing
+            git pull --rebase origin main
             git push origin main
           fi
       
