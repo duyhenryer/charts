@@ -34,11 +34,11 @@ jobs:
       - name: Generate Release Notes
         run: |
           # Process charts with CHANGELOG.md (VictoriaMetrics approach)
-          for CHANGELOG in $(find charts/*/CHANGELOG.md 2>/dev/null || echo ""); do
+          for chart_dir in charts/*/; do
+            CHANGELOG="${chart_dir}CHANGELOG.md"
             if [ -f "$CHANGELOG" ]; then
               echo "📋 Processing $CHANGELOG"
               
-              chart_dir="$(dirname $CHANGELOG)"
               chart_name=$(basename "$chart_dir")
               version=$(grep '^version:' "$chart_dir/Chart.yaml" | awk '{print $2}')
               
@@ -50,8 +50,8 @@ jobs:
               else
                 echo "🆕 Creating release notes for $chart_name-$version"
                 
-                # Extract release notes from CHANGELOG (from "# Next release" to next "##")
-                release_notes=$(sed -n '/^# Next release/,/^## /p' $CHANGELOG | sed -e '$d' -e '1d')
+                # Extract release notes from CHANGELOG (from "# Next release" to next "##" or end of file)
+                release_notes=$(sed -n '/^# Next release/,/^## \|$/p' $CHANGELOG | sed -e '1d' | sed -e '/^## /d' | sed -e '/^$/d')
                 
                 # Create RELEASE_NOTES file
                 cat > "${chart_dir}/RELEASE_NOTES" << EOF
@@ -73,7 +73,7 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-  release-ghcr:
+  release-oci:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -110,7 +110,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish Charts to GHCR
+      - name: Publish Charts to OCI
         if: ${{ hashFiles('charts/*/RELEASE_NOTES') != '' }}
         run: |
           for pkg in .cr-release-packages/*; do
