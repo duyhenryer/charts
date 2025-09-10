@@ -51,21 +51,24 @@ jobs:
                 echo "🆕 Creating release notes for $chart_name-$version"
                 
                 # Extract release notes from CHANGELOG (from "# Next release" to next "##" or end of file)
-                release_notes=$(sed -n '/^# Next release/,/^## \|$/p' $CHANGELOG | sed '1d; /^## /d')
+                release_notes=$(sed -n '/^# Next release/,/^## \|$/p' $CHANGELOG | sed -e '1d' | sed -e '/^## /d' | sed -e '/^$/d')
                 
                 # Create RELEASE_NOTES file with badges
                 app_version=$(grep '^appVersion:' "$chart_dir/Chart.yaml" | awk '{print $2}' | tr -d '"')
                 
                 cat > "${chart_dir}/RELEASE_NOTES" << EOF
-                # Release notes for version ${version}
-
-                **Release date:** $(date '+%d %b %Y')
-
-                ![Helm: v3](https://img.shields.io/badge/Helm-v3.14%2B-informational?color=informational&logo=helm) ![AppVersion: ${app_version}](https://img.shields.io/badge/AppVersion-${app_version}-success?color=success&logo=docker)
-
-                ${release_notes}
-                EOF
-                echo "ℹ️  CHANGELOG.md will be manually updated by developer"
+          # Release notes for version ${version}
+          
+          **Release date:** $(date '+%d %b %Y')
+          
+          ![Helm: v3](https://img.shields.io/badge/Helm-v3.14%2B-informational?color=informational&logo=helm) ![AppVersion: ${app_version}](https://img.shields.io/badge/AppVersion-${app_version}-success?color=success&logo=docker)
+          
+          ${release_notes}
+          EOF
+          
+                # Update CHANGELOG.md: add new version section
+                release_date=$(date '+%d %b %Y')
+                sed -i "s/# Next release/# Next release\n\n- TODO\n\n## ${version}\n\n**Release date:** ${release_date}\n\n![Helm: v3](https:\/\/img.shields.io\/badge\/Helm-v3.14%2B-informational?color=informational\&logo=helm) ![AppVersion: ${app_version}](https:\/\/img.shields.io\/badge\/AppVersion-${app_version}-success?color=success\&logo=docker)\n\n${release_notes}/" $CHANGELOG
               fi
             fi
           done
@@ -108,3 +111,17 @@ jobs:
             fi
             helm push "${pkg}" oci://ghcr.io/duyhenryer/charts
           done
+
+      # - name: Update CHANGELOG.md files
+      #   if: ${{ hashFiles('charts/*/RELEASE_NOTES') != '' }}
+      #   run: |
+      #     # Commit updated CHANGELOG.md files
+      #     git add charts/*/CHANGELOG.md
+      #     if git diff --staged --quiet; then
+      #       echo "No CHANGELOG.md changes to commit"
+      #     else
+      #       git commit -m "chore: update CHANGELOG.md files after release"
+      #       # Pull latest changes before pushing
+      #       git pull --rebase origin main
+      #       git push origin main
+      #     fi
