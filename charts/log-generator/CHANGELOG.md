@@ -1,7 +1,8 @@
 # Next release
 
-- Improve chart metadata and keywords
-- Add professional release notes
+- Implement VictoriaMetrics-style CHANGELOG.md approach
+- Add proper release notes generation from CHANGELOG
+- Improve workflow logic for better release management
 
 ## 0.1.7
 
