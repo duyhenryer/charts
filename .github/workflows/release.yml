@@ -130,8 +130,8 @@ jobs:
             helm push "${pkg}" oci://ghcr.io/duyhenryer/charts
           done
 
-      - name: Cleanup Release Notes
-        if: ${{ hashFiles('charts/*/RELEASE_NOTES') != '' }}
-        run: |
-          # Clean up RELEASE_NOTES files after successful release
-          rm -f charts/*/RELEASE_NOTES
+      # - name: Cleanup Release Notes
+      #   if: ${{ hashFiles('charts/*/RELEASE_NOTES') != '' }}
+      #   run: |
+      #     # Clean up RELEASE_NOTES files after successful release
+      #     # rm -f charts/*/RELEASE_NOTES
