@@ -1,6 +1,7 @@
 name: Release Charts
 
 on:
+  workflow_dispatch:  # Manual trigger from GitHub UI
   push:
     branches: [main]
     paths:
@@ -32,29 +33,29 @@ jobs:
       # Publish charts to gh-pages branch
       - name: Generate Release Notes
         run: |
-          mkdir -p .cr-release-notes
-          # Get changed charts from git diff
-          changed_charts=$(git diff --name-only $(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD | grep "^charts/" | cut -d'/' -f2 | sort -u)
-          
-          echo "📦 Changed charts: $changed_charts"
-          
-          for chart_name in $changed_charts; do
-            chart_dir="charts/$chart_name"
-            if [ -d "$chart_dir" ] && [ -f "$chart_dir/Chart.yaml" ]; then
+          # Process all charts (simple approach like VictoriaMetrics)
+          for chart_dir in charts/*/; do
+            chart_name=$(basename "$chart_dir")
+            if [ -f "$chart_dir/Chart.yaml" ]; then
               version=$(grep '^version:' "$chart_dir/Chart.yaml" | awk '{print $2}')
+              description=$(grep '^description:' "$chart_dir/Chart.yaml" | cut -d':' -f2- | sed 's/^ *//')
+              
               echo "📋 Processing $chart_name version $version"
               
-              changelog=$(git log --oneline --no-merges $(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD -- "$chart_dir" | sed 's/^/- /' | head -5)
-              echo "📝 Changelog: $changelog"
-            
-            cat > ".cr-release-notes/${chart_name}-${version}.md" << EOF
+              # Check if this version already has a tag (skip if exists)
+              if git tag | grep -q "^${chart_name}-${version}$"; then
+                echo "⏭️  Version $chart_name-$version already tagged, skipping"
+              else
+                echo "🆕 Creating release notes for $chart_name-$version"
+                # Create RELEASE_NOTES file
+                cat > "${chart_dir}/RELEASE_NOTES" << EOF
           # Release notes for version ${version}
           
           **Release date:** $(date '+%d %b %Y')
           
           ## 🎉 What's New
           
-          ${changelog:-"- 🚀 Initial release of ${chart_name}"}
+          ${description}
           
           ## 📦 Installation
           
@@ -69,16 +70,17 @@ jobs:
           helm install my-${chart_name} oci://ghcr.io/duyhenryer/charts/${chart_name} --version ${version}
           \`\`\`
           EOF
+              fi
             fi
           done
 
       - name: Publish charts to GitHub Pages
+        if: ${{ hashFiles('charts/*/RELEASE_NOTES') != '' }}
         uses: helm/chart-releaser-action@v1.7.0
         with:
           config: .github/configs/cr.yaml
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          CR_RELEASE_NOTES_DIR: ".cr-release-notes"
 
   release-ghcr:
     runs-on: ubuntu-latest
@@ -100,15 +102,13 @@ jobs:
 
       # Publish OCI charts to ghcr.io
       - name: Generate charts
+        if: ${{ hashFiles('charts/*/RELEASE_NOTES') != '' }}
         run: |
           mkdir -p .cr-release-packages
-          # Get changed charts from git diff
-          changed_charts=$(git diff --name-only $(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD | grep "^charts/" | cut -d'/' -f2 | sort -u)
-          
-          for chart_name in $changed_charts; do
-            chart_dir="charts/$chart_name"
-            if [ -d "$chart_dir" ] && [ -f "$chart_dir/Chart.yaml" ]; then
-              helm package "$chart_dir" --destination .cr-release-packages
+          # Only package charts that have RELEASE_NOTES
+          for chart in charts/*; do
+            if [ -f "$chart/RELEASE_NOTES" ]; then
+              helm package "$chart" --destination .cr-release-packages
             fi
           done
 
@@ -120,6 +120,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish Charts to GHCR
+        if: ${{ hashFiles('charts/*/RELEASE_NOTES') != '' }}
         run: |
           for pkg in .cr-release-packages/*; do
             echo ${pkg}
@@ -128,3 +129,9 @@ jobs:
             fi
             helm push "${pkg}" oci://ghcr.io/duyhenryer/charts
           done
+
+      - name: Cleanup Release Notes
+        if: ${{ hashFiles('charts/*/RELEASE_NOTES') != '' }}
+        run: |
+          # Clean up RELEASE_NOTES files after successful release
+          rm -f charts/*/RELEASE_NOTES
