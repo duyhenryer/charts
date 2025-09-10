@@ -60,6 +60,30 @@ entries:
     version: 1.5.1
   log-generator:
   - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-09-10T14:31:34.256157348Z"
+    description: A configurable log generator for testing and benchmarking log pipelines
+    digest: ab7b106fad1722d9b08ecd9576d05eb05df181c90424995568b0bea33f64567d
+    home: https://duyhenryer.github.io/charts/
+    icon: https://raw.githubusercontent.com/duyhenryer/log-generator/main/docs/logo.png
+    keywords:
+    - log
+    - generator
+    - testing
+    - observability
+    maintainers:
+    - email: hello@duyne.me
+      name: Duy nè
+      url: https://duyne.me
+    name: log-generator
+    sources:
+    - https://github.com/duyhenryer/charts
+    - https://github.com/duyhenryer/log-generator
+    type: application
+    urls:
+    - https://github.com/duyhenryer/charts/releases/download/log-generator-0.1.2/log-generator-0.1.2.tgz
+    version: 0.1.2
+  - apiVersion: v2
     appVersion: 1.16.0
     created: "2025-09-10T09:33:49.512126338Z"
     description: A Helm chart for Kubernetes
@@ -69,4 +93,4 @@ entries:
     urls:
     - https://github.com/duyhenryer/charts/releases/download/log-generator-0.1.0/log-generator-0.1.0.tgz
     version: 0.1.0
-generated: "2025-09-10T09:33:49.512136247Z"
+generated: "2025-09-10T14:31:34.25616898Z"
