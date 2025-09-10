@@ -29,12 +29,50 @@ jobs:
           version: v3.9.0
           
       # Publish charts to gh-pages branch
+      - name: Generate Release Notes
+        run: |
+          mkdir -p .cr-release-notes
+          # Get changed charts only
+          changed_charts=$(git diff --name-only $(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD | grep "^charts/" | cut -d'/' -f2 | sort -u)
+          
+          for chart_name in $changed_charts; do
+            chart_dir="charts/$chart_name"
+            if [ -d "$chart_dir" ] && [ -f "$chart_dir/Chart.yaml" ]; then
+              version=$(grep '^version:' "$chart_dir/Chart.yaml" | awk '{print $2}')
+              changelog=$(git log --oneline --no-merges $(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD -- "$chart_dir" | sed 's/^/- /' | head -5)
+            
+            cat > ".cr-release-notes/${chart_name}-${version}.md" << EOF
+          # Release notes for version ${version}
+          
+          **Release date:** $(date '+%d %b %Y')
+          
+          ## 🎉 What's New
+          
+          ${changelog:-"- 🚀 Initial release of ${chart_name}"}
+          
+          ## 📦 Installation
+          
+          ### Using Helm Repository
+          \`\`\`bash
+          helm repo add duyhenryer https://duyhenryer.github.io/charts/
+          helm install my-${chart_name} duyhenryer/${chart_name} --version ${version}
+          \`\`\`
+          
+          ### Using OCI Registry
+          \`\`\`bash
+          helm install my-${chart_name} oci://ghcr.io/duyhenryer/charts/${chart_name} --version ${version}
+          \`\`\`
+          EOF
+            fi
+          done
+
       - name: Publish charts to GitHub Pages
         uses: helm/chart-releaser-action@v1.6.0
         with:
           config: .github/configs/cr.yaml
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_RELEASE_NOTES_DIR: ".cr-release-notes"
 
   release-ghcr:
     runs-on: ubuntu-latest
