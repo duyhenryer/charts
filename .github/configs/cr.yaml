@@ -1,2 +1,4 @@
 index-path: "./index.yaml"
-skip-existing: "true"
+skip-existing: true
+generate-release-notes: false
+release-notes-file: RELEASE_NOTES
