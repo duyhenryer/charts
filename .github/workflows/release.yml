@@ -33,7 +33,7 @@ jobs:
       # Publish charts to gh-pages branch
       - name: Generate Release Notes
         run: |
-          # Process charts with CHANGELOG.md (VictoriaMetrics approach)
+          # Process charts with CHANGELOG.md
           for chart_dir in charts/*/; do
             CHANGELOG="${chart_dir}CHANGELOG.md"
             if [ -f "$CHANGELOG" ]; then
@@ -44,7 +44,7 @@ jobs:
               
               echo "📦 Chart: $chart_name version $version"
               
-              # Check if version already in CHANGELOG (VictoriaMetrics logic)
+              # Check if version already in CHANGELOG
               if grep -q "^## $version$" $CHANGELOG; then
                 echo "⏭️  Version $version already in CHANGELOG, skipping"
               else
@@ -53,14 +53,22 @@ jobs:
                 # Extract release notes from CHANGELOG (from "# Next release" to next "##" or end of file)
                 release_notes=$(sed -n '/^# Next release/,/^## \|$/p' $CHANGELOG | sed -e '1d' | sed -e '/^## /d' | sed -e '/^$/d')
                 
-                # Create RELEASE_NOTES file
+                # Create RELEASE_NOTES file with badges
+                app_version=$(grep '^appVersion:' "$chart_dir/Chart.yaml" | awk '{print $2}' | tr -d '"')
+                
                 cat > "${chart_dir}/RELEASE_NOTES" << EOF
           # Release notes for version ${version}
           
           **Release date:** $(date '+%d %b %Y')
           
+          ![Helm: v3](https://img.shields.io/badge/Helm-v3.14%2B-informational?color=informational&logo=helm) ![AppVersion: ${app_version}](https://img.shields.io/badge/AppVersion-${app_version}-success?color=success&logo=docker)
+          
           ${release_notes}
           EOF
+          
+                # Update CHANGELOG.md: add new version section
+                release_date=$(date '+%d %b %Y')
+                sed -i "s/# Next release/# Next release\n\n- TODO\n\n## ${version}\n\n**Release date:** ${release_date}\n\n![Helm: v3](https:\/\/img.shields.io\/badge\/Helm-v3.14%2B-informational?color=informational\&logo=helm) ![AppVersion: ${app_version}](https:\/\/img.shields.io\/badge\/AppVersion-${app_version}-success?color=success\&logo=docker)\n\n${release_notes}/" $CHANGELOG
               fi
             fi
           done
@@ -121,6 +129,18 @@ jobs:
             helm push "${pkg}" oci://ghcr.io/duyhenryer/charts
           done
 
+      - name: Update CHANGELOG.md files
+        if: ${{ hashFiles('charts/*/RELEASE_NOTES') != '' }}
+        run: |
+          # Commit updated CHANGELOG.md files
+          git add charts/*/CHANGELOG.md
+          if git diff --staged --quiet; then
+            echo "No CHANGELOG.md changes to commit"
+          else
+            git commit -m "chore: update CHANGELOG.md files after release"
+            git push origin main
+          fi
+      
       # - name: Cleanup Release Notes
       #   if: ${{ hashFiles('charts/*/RELEASE_NOTES') != '' }}
       #   run: |
