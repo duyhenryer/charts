@@ -58,4 +58,15 @@ entries:
     urls:
     - https://github.com/duyhenryer/charts/releases/download/karpenter-nodepool-1.5.1/karpenter-nodepool-1.5.1.tgz
     version: 1.5.1
-generated: "2025-09-09T13:49:46.917663861Z"
+  log-generator:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-09-10T09:33:49.512126338Z"
+    description: A Helm chart for Kubernetes
+    digest: fecb9751fb9f8ecacf7e7bc3e79603ea147d26da1d7f2e3ef2eb8c42f841fe84
+    name: log-generator
+    type: application
+    urls:
+    - https://github.com/duyhenryer/charts/releases/download/log-generator-0.1.0/log-generator-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-09-10T09:33:49.512136247Z"
