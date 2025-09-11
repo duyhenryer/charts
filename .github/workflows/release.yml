@@ -1,11 +1,9 @@
 name: Release Charts
 
 on:
-  workflow_dispatch:  # Manual trigger from GitHub UI
   push:
-    branches: [main]
-    paths:
-      - 'charts/**'
+    branches:
+      - main
 
 permissions:
   contents: write # publish chart to gh-pages branch
@@ -31,70 +29,40 @@ jobs:
           version: v3.9.0
           
       # Publish charts to gh-pages branch
-      - name: Generate Release Notes
-        run: |
-          # Process charts with CHANGELOG.md
-          for chart_dir in charts/*/; do
-            CHANGELOG="${chart_dir}CHANGELOG.md"
-            if [ -f "$CHANGELOG" ]; then
-              echo "📋 Processing $CHANGELOG"
-              
-              chart_name=$(basename "$chart_dir")
-              version=$(grep '^version:' "$chart_dir/Chart.yaml" | awk '{print $2}')
-              
-              echo "📦 Chart: $chart_name version $version"
-              
-              # Check if version already in CHANGELOG
-              if grep -q "^## $version$" $CHANGELOG; then
-                echo "⏭️  Version $version already in CHANGELOG, skipping"
-              else
-                echo "🆕 Creating release notes for $chart_name-$version"
-                
-                # Extract release notes from CHANGELOG (from "# Next release" to next "##" or end of file)
-                release_notes=$(sed -n '/^# Next release/,/^## \|$/p' $CHANGELOG | sed -e '1d' | sed -e '/^## /d' | sed -e '/^$/d')
-                
-                # Create RELEASE_NOTES file with badges
-                app_version=$(grep '^appVersion:' "$chart_dir/Chart.yaml" | awk '{print $2}' | tr -d '"')
-                
-                cat > "${chart_dir}/RELEASE_NOTES" << EOF
-          # Release notes for version ${version}
-          
-          **Release date:** $(date '+%d %b %Y')
-          
-          ![Helm: v3](https://img.shields.io/badge/Helm-v3.14%2B-informational?color=informational&logo=helm) ![AppVersion: ${app_version}](https://img.shields.io/badge/AppVersion-${app_version}-success?color=success&logo=docker)
-          
-          ${release_notes}
-          EOF
-          
-                # Update CHANGELOG.md: add new version section
-                release_date=$(date '+%d %b %Y')
-                sed -i "s/# Next release/# Next release\n\n- TODO\n\n## ${version}\n\n**Release date:** ${release_date}\n\n![Helm: v3](https:\/\/img.shields.io\/badge\/Helm-v3.14%2B-informational?color=informational\&logo=helm) ![AppVersion: ${app_version}](https:\/\/img.shields.io\/badge\/AppVersion-${app_version}-success?color=success\&logo=docker)\n\n${release_notes}/" $CHANGELOG
-              fi
-            fi
-          done
-
       - name: Publish charts to GitHub Pages
-        if: ${{ hashFiles('charts/*/RELEASE_NOTES') != '' }}
         uses: helm/chart-releaser-action@v1.7.0
         with:
           config: .github/configs/cr.yaml
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      # Publish OCI charts to ghcr.io (in same job to access RELEASE_NOTES)
+  release-ghcr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "duynhbot@users.noreply.github.com"
+          git config --local user.name "Auto Release Bot"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4.3.1
+        with:
+          version: v3.9.0
+
+      # Publish OCI charts to ghcr.io
       - name: Generate charts
-        if: ${{ hashFiles('charts/*/RELEASE_NOTES') != '' }}
         run: |
           mkdir -p .cr-release-packages
-          # Only package charts that have RELEASE_NOTES
-          for chart in charts/*; do
-            if [ -f "$chart/RELEASE_NOTES" ]; then
-              helm package "$chart" --destination .cr-release-packages
-            fi
+          for d in charts/* ; do
+            helm package "$d" --destination .cr-release-packages
           done
 
       - name: Login to GitHub Container Registry
-        if: ${{ hashFiles('charts/*/RELEASE_NOTES') != '' }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -102,7 +70,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish Charts to OCI
-        if: ${{ hashFiles('charts/*/RELEASE_NOTES') != '' }}
         run: |
           for pkg in .cr-release-packages/*; do
             echo ${pkg}
@@ -111,17 +78,3 @@ jobs:
             fi
             helm push "${pkg}" oci://ghcr.io/duyhenryer/charts
           done
-
-      # - name: Update CHANGELOG.md files
-      #   if: ${{ hashFiles('charts/*/RELEASE_NOTES') != '' }}
-      #   run: |
-      #     # Commit updated CHANGELOG.md files
-      #     git add charts/*/CHANGELOG.md
-      #     if git diff --staged --quiet; then
-      #       echo "No CHANGELOG.md changes to commit"
-      #     else
-      #       git commit -m "chore: update CHANGELOG.md files after release"
-      #       # Pull latest changes before pushing
-      #       git pull --rebase origin main
-      #       git push origin main
-      #     fi
