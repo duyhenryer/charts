@@ -12,13 +12,12 @@ image:
   tag: "latest"
 
 args:
-  - log-generator
   - --format 
   - json 
   - --sleep 
-  - 1 
+  - "1"
   - --count 
-  - 100
+  - "100"
 
 imagePullSecrets: []
 # This is to override the chart name.
