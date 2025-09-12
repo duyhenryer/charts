@@ -22,13 +22,12 @@ A configurable log generator for testing and benchmarking log pipelines
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| args[0] | string | `"log-generator"` |  |
-| args[1] | string | `"--format"` |  |
-| args[2] | string | `"json"` |  |
-| args[3] | string | `"--sleep"` |  |
-| args[4] | int | `1` |  |
-| args[5] | string | `"--count"` |  |
-| args[6] | int | `100` |  |
+| args[0] | string | `"--format"` |  |
+| args[1] | string | `"json"` |  |
+| args[2] | string | `"--sleep"` |  |
+| args[3] | string | `"1"` |  |
+| args[4] | string | `"--count"` |  |
+| args[5] | string | `"100"` |  |
 | autoscaling.enabled | bool | `false` |  |
 | autoscaling.maxReplicas | int | `100` |  |
 | autoscaling.minReplicas | int | `1` |  |
