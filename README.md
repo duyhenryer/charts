@@ -89,5 +89,5 @@ helm install cloudflared oci://ghcr.io/duyhenryer/charts/cloudflared --version 0
 helm install karpenter-nodes oci://ghcr.io/duyhenryer/charts/karpenter-nodepool --version 1.5.1
 
 # Pull and install log-generator
-helm install log-generator oci://ghcr.io/duyhenryer/charts/log-generator --version 0.1.2
+helm install log-generator oci://ghcr.io/duyhenryer/charts/log-generator --version 0.1.3
 ```
