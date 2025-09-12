@@ -35,6 +35,7 @@ helm registry login ghcr.io
 |-------|---------|-------------|-------------|
 | [cloudflared](./charts/cloudflared) | 0.2.1 | 2024.11.0 | Deploy Cloudflare Tunnel for secure ingress |
 | [karpenter-nodepool](./charts/karpenter-nodepool) | 1.5.1 | 1.5.0 | Karpenter NodePool and EC2NodeClass resources |
+| [log-generator](./charts/log-generator) | 0.1.1 | latest | Configurable log generator for testing and benchmarking |
 
 ## Quick Start
 
@@ -68,6 +69,16 @@ helm install karpenter-nodes duyhenryer/karpenter-nodepool \
 helm install karpenter-nodes duyhenryer/karpenter-nodepool -f my-values.yaml
 ```
 
+### log-generator - Log Generator for Testing
+
+```bash
+# Install with default values (generates infinite logs)
+helm install log-generator duyhenryer/log-generator
+
+# Install with custom values file
+helm install log-generator duyhenryer/log-generator -f my-values.yaml
+```
+
 ## Using OCI Registry
 
 ```bash
@@ -76,4 +87,7 @@ helm install cloudflared oci://ghcr.io/duyhenryer/charts/cloudflared --version 0
 
 # Pull and install karpenter-nodepool
 helm install karpenter-nodes oci://ghcr.io/duyhenryer/charts/karpenter-nodepool --version 1.5.1
+
+# Pull and install log-generator
+helm install log-generator oci://ghcr.io/duyhenryer/charts/log-generator --version 0.1.2
 ```
