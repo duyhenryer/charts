@@ -40,8 +40,8 @@ jobs:
       - name: Configure Git
         if: steps.generate.outputs.docs-updated == 'true'
         run: |
-          git config --local user.email "duynhbot@users.noreply.github.com"
-          git config --local user.name "duynhbot"
+          git config --local user.email "duynebot@users.noreply.github.com"
+          git config --local user.name "duynebot"
 
       - name: Commit and Push changes
         if: steps.generate.outputs.docs-updated == 'true'
