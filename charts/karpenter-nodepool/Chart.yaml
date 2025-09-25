@@ -9,7 +9,6 @@ keywords:
   - node
   - autoscaling
   - karpenter
-  - karpenter-crds
   - nodepool
   - ec2nodeclass
 
