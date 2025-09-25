@@ -11,11 +11,17 @@ apiVersion: karpenter.sh/v1
 kind: NodePool
 metadata:
   name: {{ $key }}
+  labels:
+    {{- include "nodepool.labels" $ | nindent 4 }}
+  {{- if $.Values.globalAnnotations }}
+  annotations:
+    {{- include "annotations" $ | nindent 4 }}
+  {{- end }}
 spec:
   template:
     metadata:
       labels:
-        {{- include "nodepool.labels" $ | nindent 8 }}
+        {{- include "nodepool.nodeLabels" $ | nindent 8 }}
         {{- with .labels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}

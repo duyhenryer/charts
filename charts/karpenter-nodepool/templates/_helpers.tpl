@@ -31,11 +31,10 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Common labels
+Common labels for EC2NodeClass (still uses standard Helm labels)
 */}}
 {{- define "karpenter-nodepool.labels" -}}
 helm.sh/chart: {{ include "karpenter-nodepool.chart" . }}
-{{ include "karpenter-nodepool.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -43,18 +42,37 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-Selector labels
+Safe labels for NodePool resource metadata (v1.5.x compatible)
+These labels go on NodePool metadata.labels and also cannot use restricted domains in v1.5.x
 */}}
-{{- define "karpenter-nodepool.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "karpenter-nodepool.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{- define "nodepool.labels" -}}
+helm.sh/chart: {{ include "karpenter-nodepool.chart" . }}
+{{- if .Values.globalLabels }}
+{{- range $key, $value := .Values.globalLabels }}
+{{- if not (or (hasPrefix "kubernetes.io/" $key) (hasPrefix "karpenter.sh/" $key) (hasPrefix "karpenter.k8s.aws/" $key) (hasPrefix "app.kubernetes.io/" $key)) }}
+{{ $key }}: {{ $value | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
 {{- end }}
 
 {{/*
-Common labels for NodePool resources
+Safe labels for NodePool node template (excludes ALL restricted domains)
+These labels go on spec.template.metadata.labels and CANNOT use:
+- kubernetes.io (reserved by Kubernetes) 
+- karpenter.sh (reserved by Karpenter)  
+- karpenter.k8s.aws (reserved by Karpenter AWS provider)
+- app.kubernetes.io (Kubernetes app labels)
+Note: Only custom domain labels are allowed here
 */}}
-{{- define "nodepool.labels" -}}
-{{- include "karpenter-nodepool.labels" . }}
+{{- define "nodepool.nodeLabels" -}}
+{{- if .Values.globalLabels }}
+{{- range $key, $value := .Values.globalLabels }}
+{{- if not (or (hasPrefix "kubernetes.io/" $key) (hasPrefix "karpenter.sh/" $key) (hasPrefix "karpenter.k8s.aws/" $key) (hasPrefix "app.kubernetes.io/" $key)) }}
+{{ $key }}: {{ $value | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
 {{- end }}
 
 {{/*
