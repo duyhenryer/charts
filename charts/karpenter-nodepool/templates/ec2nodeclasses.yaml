@@ -1,5 +1,8 @@
 {{/*
-ec2nodeclass custom resource template (compatible with karpenter v1.5.0)
+EC2NodeClass custom resource template for Karpenter v1.5.x
+- Uses stable API: karpenter.k8s.aws/v1  
+- Includes kubelet configuration (moved from NodePool in v1.5)
+- Supports all v1.5 AWS-specific features and security options
 */}}
 
 {{- range $key, $value := .Values.ec2NodeClass }}
@@ -65,5 +68,9 @@ spec:
   {{- end }}
   {{- if .associatePublicIPAddress }}
   associatePublicIPAddress: {{ default "false" .associatePublicIPAddress }}
+  {{- end }}
+  {{- with .kubelet }}
+  kubelet:
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 {{- end }}

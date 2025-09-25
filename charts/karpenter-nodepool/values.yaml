@@ -1,6 +1,11 @@
 # Default values for karpenter-nodepool.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+# This Helm chart is compatible with Karpenter v1.5.x
+# 
+# Key v1.5 Changes:
+# - Kubelet configuration moved from NodePool to EC2NodeClass
+# - Uses stable APIs: karpenter.sh/v1 and karpenter.k8s.aws/v1
+# - Supports new AMI alias format (e.g., al2@latest)
+# - Enhanced disruption budgets with scheduling support
 
 nameOverride: ""
 
@@ -11,16 +16,22 @@ globalAnnotations: {}
 nodePool:
   default:
     # Labels are arbitrary key-values that are applied to all nodes
+    # WARNING: Cannot use restricted domains like 'kubernetes.io' or 'node.kubernetes.io' 
+    # These are reserved for Kubernetes/Karpenter internal use only
+    # Valid examples: environment: staging, team: platform, billing-team: my-team
     labels: {}
  
     # Annotations are arbitrary key-values that are applied to all nodes
+    # Annotations can use restricted domains (unlike labels)
+    # Examples: cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
     annotations: {}
 
-    # References the Cloud Provider's NodeClass resource, see your cloud provider specific documentation
+    # References the Cloud Provider's NodeClass resource, see your cloud provider specific documentation  
+    # REQUIRED: Must reference an existing EC2NodeClass for AWS
     nodeClassRef: {}
-      # group: karpenter.k8s.aws
-      # kind: EC2NodeClass
-      # name: default
+      # group: karpenter.k8s.aws  # Updated in v1.5 - only single version served
+      # kind: EC2NodeClass        # AWS-specific NodeClass
+      # name: default             # Name of your EC2NodeClass resource
 
     # Provisioned nodes will have these taints
     # Taints may prevent pods from scheduling if they are not tolerated by the pod. 
@@ -41,71 +52,66 @@ nodePool:
     # its finalization flow. Pods with TerminationGracePeriodSeconds will be deleted preemptively before this terminationGracePeriod ends to give as much time to cleanup as possible.
     # If your pod's terminationGracePeriodSeconds is larger than this terminationGracePeriod, Karpenter may forcibly delete the pod
     # before it has its full terminationGracePeriod to cleanup.
-
+    #
+    # IMPORTANT in v1.5: When terminationGracePeriod is configured, nodes become eligible for Drift disruption 
+    # even if pods have blocking PDBs or 'karpenter.sh/do-not-disrupt' annotations.
+    # This ensures critical updates (like AMI updates for CVEs) can proceed.
+    #
+    # Used with expireAfter to enforce absolute maximum node lifetime:
+    # Maximum node lifetime = expireAfter + terminationGracePeriod
+    #
     # Note: changing this value in the nodepool will drift the nodeclaims.
+    # Examples: "30s", "5m", "30m", "1h"
     terminationGracePeriod: ~
 
     # Requirements that constrain the parameters of provisioned nodes.
     # These requirements are combined with pod.spec.topologySpreadConstraints, pod.spec.affinity.nodeAffinity, pod.spec.affinity.podAffinity, and pod.spec.nodeSelector rules.
     # Operators { In, NotIn, Exists, DoesNotExist, Gt, and Lt } are supported.
     # https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#operators
+    # Requirements constrain the parameters of provisioned nodes
+    # Karpenter v1.5 RECOMMENDED requirements for generic workloads:
     requirements: []
-      # - key: "karpenter.k8s.aws/instance-category"
-      #   operator: In
-      #   values: ["c", "m" , "r"]
-      # - key: "karpenter.k8s.aws/instance-cpu"
-      #   operator: In
-      #   values: ["4", "8", "16", "32"]
-      # - key: "karpenter.k8s.aws/instance-hypervisor"
-      #   operator: In
-      #   values: ["nitro"]
-      # - key: "karpenter.k8s.aws/instance-generation"
-      #   operator: Gt
-      #   values: ["2"]
+      # # RECOMMENDED v1.5 requirements for most use-cases:  
       # - key: "kubernetes.io/arch"
       #   operator: In
       #   values: ["amd64"]
+      # - key: "kubernetes.io/os"
+      #   operator: In
+      #   values: ["linux"]
       # - key: "karpenter.sh/capacity-type"
       #   operator: In
-      #   values: ["spot", "on-demand"]
+      #   values: ["on-demand"]  # or ["spot", "on-demand"] for cost optimization
+      # - key: "karpenter.k8s.aws/instance-category"
+      #   operator: In
+      #   values: ["c", "m", "r"]
+      # - key: "karpenter.k8s.aws/instance-generation"
+      #   operator: Gt
+      #   values: ["2"]
+      # 
+      # # OPTIONAL: Additional constraints  
+      # - key: "karpenter.k8s.aws/instance-cpu"
+      #   operator: In
+      #   values: ["2", "4", "8", "16", "32"]
+      # - key: "karpenter.k8s.aws/instance-hypervisor"
+      #   operator: In
+      #   values: ["nitro"]
+      # - key: "topology.kubernetes.io/zone"
+      #   operator: In
+      #   values: ["us-west-2a", "us-west-2b", "us-west-2c"]
+      # 
+      # # NEW in v1.5: minValues for flexibility requirements (ALPHA)
+      # - key: "karpenter.k8s.aws/instance-family"
+      #   operator: Exists
+      #   minValues: 3  # Ensure at least 3 instance families available
 
     # The amount of time a Node can live on the cluster before being removed
     # Avoiding long-running Nodes helps to reduce security vulnerabilities as well as to reduce the chance of issues that can plague Nodes with long uptimes such as file fragmentation or memory leaks from system processes
     # You can choose to disable expiration entirely by setting the string value 'Never' here
     expireAfter: 720h
 
-    # Karpenter provides the ability to specify a few additional Kubelet args.
-    # These are all optional and provide support for additional customization and use cases.
-    # Ex:
-    #  clusterDNS: ["10.0.1.100"]
-    #  containerRuntime: containerd
-    #  systemReserved:
-    #    cpu: 100m
-    #    memory: 100Mi
-    #    ephemeral-storage: 1Gi
-    #  kubeReserved:
-    #    cpu: 200m
-    #    memory: 100Mi
-    #    ephemeral-storage: 3Gi
-    #  evictionHard:
-    #    memory.available: 5%
-    #    nodefs.available: 10%
-    #    nodefs.inodesFree: 10%
-    #  evictionSoft:
-    #    memory.available: 500Mi
-    #    nodefs.available: 15%
-    #    nodefs.inodesFree: 15%
-    #  evictionSoftGracePeriod:
-    #    memory.available: 1m
-    #    nodefs.available: 1m30s
-    #    nodefs.inodesFree: 2m
-    #  evictionMaxPodGracePeriod: 60
-    #  imageGCHighThresholdPercent: 85
-    #  imageGCLowThresholdPercent: 80
-    #  cpuCFSQuota: true
-    #  podsPerCore: 2
-    #  maxPods: 20
- 
+    # NOTE: In Karpenter v1.5, Kubelet configuration has been MOVED to EC2NodeClass spec
+    # This section is kept empty for v1.5 compatibility. Configure kubelet settings in ec2NodeClass section below.
+    # Keeping this field for backward compatibility with chart structure
     kubelet: {}
    
     # Disruption section which describes the ways in which Karpenter can disrupt and replace Nodes
@@ -113,14 +119,29 @@ nodePool:
     # like rolling Nodes due to them hitting their maximum lifetime (expiry) or scaling down nodes to reduce cluster cost
     disruption:
       # Describes which types of Nodes Karpenter should consider for consolidation
-      # If using 'WhenUnderutilized', Karpenter will consider all nodes for consolidation and attempt to remove or replace Nodes when it discovers that the Node is underutilized and could be changed to reduce cost
-      # If using `WhenEmpty`, Karpenter will only consider nodes for consolidation that contain no workload pods
-      consolidationPolicy: WhenUnderutilized
+      # Valid values in Karpenter v1.5:
+      # - 'WhenEmpty': Only consolidate nodes that contain no workload pods (except daemonsets)
+      # - 'WhenEmptyOrUnderutilized': Consolidate both empty and underutilized nodes (DEFAULT)
+      # - 'Never': Disable consolidation entirely
+      consolidationPolicy: WhenEmptyOrUnderutilized
       
       # The amount of time Karpenter should wait after discovering a consolidation decision
-      # This value can currently only be set when the consolidationPolicy is 'WhenEmpty'
-      # You can choose to disable consolidation entirely by setting the string value 'Never' here
-      # consolidateAfter: 30s
+      # - With 'WhenEmpty': Wait after node becomes empty before considering consolidation
+      # - With 'WhenEmptyOrUnderutilized': Wait after pod schedules/removes before considering consolidation
+      # Default: 0s (immediate consolidation)
+      # Examples: "30s", "5m", "1h"
+      consolidateAfter: 0s
+      
+      # Optional: Disruption budgets to rate-limit voluntary disruptions
+      # If undefined, defaults to one budget with "nodes: 10%"
+      # budgets:
+      #   - nodes: "10%"              # Allow up to 10% of nodes to be disrupted
+      #   - nodes: "5"                # Or maximum 5 nodes (static limit)
+      #     reasons: ["Empty"]        # Only apply to specific reasons
+      #   - nodes: "0"                # Block disruptions during specific times  
+      #     schedule: "@daily"        # Use cron syntax for scheduling
+      #     duration: "10m"           # Duration to enforce the budget
+      #     reasons: ["Underutilized"]
     
     # Resource limits constrain the total size of the cluster.
     # Limits prevent Karpenter from creating new instances once the limit is exceeded.
@@ -129,7 +150,10 @@ nodePool:
       memory: 1000Gi
     
     # Priority given to the NodePool when the scheduler considers which NodePool
-    # weight: ""
+    # Higher weights indicate higher priority when comparing NodePools.
+    # Specifying no weight is equivalent to specifying a weight of 0.
+    # Example: weight: 10
+    weight: ~
 
 ec2NodeClass:
   default:
@@ -166,10 +190,20 @@ ec2NodeClass:
   
     # Each term in the array of amiSelectorTerms is ORed together
     # Within a single term, all conditions are ANDed
+    # 
+    # NEW in v1.5: Recommended to use 'alias' for automatic EKS-optimized AMI selection
     amiSelectorTerms: []
-      # - tags: {}
-      # - name: "amazon-eks-node-al2023-x86_64-standard-1.32-*"
-      # - id: null
+      # # RECOMMENDED v1.5 approach - automatic EKS AMI selection:
+      # - alias: al2@latest          # Latest Amazon Linux 2 EKS AMI
+      # - alias: al2023@latest       # Latest Amazon Linux 2023 EKS AMI  
+      # - alias: bottlerocket@latest # Latest Bottlerocket EKS AMI
+      # - alias: al2@v20240807       # Pinned AL2 version (recommended for production)
+      # 
+      # # Traditional tag/name/id selection (still supported):
+      # - tags:
+      #     karpenter.sh/discovery: "${CLUSTER_NAME}"
+      # - name: "amazon-eks-node-al2-*"
+      # - id: ami-1234567890abcdef0
 
     # Optional, overrides autogenerated userdata with a merge semantic
     # Ex: 
@@ -178,37 +212,64 @@ ec2NodeClass:
     userData: ""
 
     # Optional, each term in the array of capacityReservationSelectorTerms is ORed together.
+    # NEW in v1.5: Capacity Reservations support (ALPHA feature)
+    # Prioritizes on-demand capacity reservations before falling back to spot/on-demand
     capacityReservationSelectorTerms: []
+      # # Select capacity reservations by tags:
       # - tags:
-      #     karpenter.sh/discovery: ${CLUSTER_NAME}
-      # - id: cr-123
+      #     karpenter.sh/discovery: "${CLUSTER_NAME}"
+      #     Environment: "staging"
+      # # Select specific capacity reservation by ID:
+      # - id: cr-1234567890abcdef0
+      # # Select by tags with specific owner:
+      # - tags:
+      #     Purpose: "ml-training"
+      #   ownerID: "123456789012"
 
     # Optional, propagates tags to underlying EC2 resources
     tags: {}
 
     # Optional, configures IMDS for the instance
+    # v1.5 Security Best Practices - if omitted, Karpenter uses these secure defaults:
     metadataOptions: {}
-      # httpEndpoint: enabled
-      # httpProtocolIPv6: disabled
-      # httpPutResponseHopLimit: 2
-      # httpTokens: required
+      # httpEndpoint: enabled                 # Allow IMDS access
+      # httpProtocolIPv6: disabled           # Disable IPv6 IMDS
+      # httpPutResponseHopLimit: 1           # v1.5 default: prevent container access to IMDS
+      # httpTokens: required                 # Require IMDSv2 (secure token-based access)
     
     # Optional, configures storage devices for the instance
-    # Ex:
-    #  - deviceName: /dev/xvda
-    #    ebs:
-    #      volumeSize: 100Gi
-    #      volumeType: gp3
-    #      iops: 10000
-    #      encrypted: true
-    #      kmsKeyID: "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab"
-    #      deleteOnTermination: true
-    #      throughput: 125
-    #      snapshotID: snap-0123456789
+    # v1.5 enhanced block device mapping with performance optimization
     blockDeviceMappings: []
+      # # Production-ready example with GP3 and encryption:
+      # - deviceName: /dev/xvda
+      #   ebs:
+      #     volumeSize: 100Gi
+      #     volumeType: gp3                    # Recommended: gp3 for better price/performance
+      #     iops: 3000                        # GP3 baseline: 3,000 IOPS
+      #     throughput: 125                   # GP3 baseline: 125 MB/s
+      #     encrypted: true                   # Always encrypt in production
+      #     deleteOnTermination: true         # Clean up on node termination
+      #     volumeInitializationRate: 100     # NEW in v1.5: faster volume initialization
+      # 
+      # # High-performance example for I/O intensive workloads:
+      # - deviceName: /dev/xvda  
+      #   ebs:
+      #     volumeSize: 200Gi
+      #     volumeType: gp3
+      #     iops: 16000                       # Max GP3 IOPS
+      #     throughput: 1000                  # Max GP3 throughput  
+      #     encrypted: true
+      #     kmsKeyID: "arn:aws:kms:region:account:key/key-id"  # Custom KMS key
 
     # Optional, use instance-store volumes for node ephemeral-storage
+    # v1.5 supports RAID0 for high-performance ephemeral storage on supported instance types
     instanceStorePolicy: ~
+      # # Enable RAID0 for maximum performance (recommended for high-throughput workloads):
+      # instanceStorePolicy: RAID0
+      # 
+      # # Use for instance types with NVMe SSDs (c5d, m5d, r5d, etc.)
+      # # This configures /dev/md/0 mounted at /mnt/k8s-disks/0
+      # # Consider using smaller root volume size when enabling this
 
     # Optional, configures detailed monitoring for the instance
     detailedMonitoring: false
@@ -216,3 +277,38 @@ ec2NodeClass:
     # Optional, configures if the instance should be launched with an associated public IP address.
     # If not specified, the default value depends on the subnet's public IP auto-assign setting.
     associatePublicIPAddress: false
+
+    # NEW in v1.5: Kubelet configuration moved from NodePool to EC2NodeClass
+    # Karpenter provides the ability to specify additional Kubelet args for EC2 instances.
+    # These are all optional and provide support for additional customization and use cases.
+    # Ex:
+    #  kubelet:
+    #    clusterDNS: ["10.0.1.100"]
+    #    containerRuntime: containerd
+    #    systemReserved:
+    #      cpu: 100m
+    #      memory: 100Mi
+    #      ephemeral-storage: 1Gi
+    #    kubeReserved:
+    #      cpu: 200m
+    #      memory: 100Mi
+    #      ephemeral-storage: 3Gi
+    #    evictionHard:
+    #      memory.available: 5%
+    #      nodefs.available: 10%
+    #      nodefs.inodesFree: 10%
+    #    evictionSoft:
+    #      memory.available: 500Mi
+    #      nodefs.available: 15%
+    #      nodefs.inodesFree: 15%
+    #    evictionSoftGracePeriod:
+    #      memory.available: 1m
+    #      nodefs.available: 1m30s
+    #      nodefs.inodesFree: 2m
+    #    evictionMaxPodGracePeriod: 60
+    #    imageGCHighThresholdPercent: 85
+    #    imageGCLowThresholdPercent: 80
+    #    cpuCFSQuota: true
+    #    podsPerCore: 2
+    #    maxPods: 110
+    kubelet: {}

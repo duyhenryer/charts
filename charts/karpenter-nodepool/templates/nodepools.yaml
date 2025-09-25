@@ -1,5 +1,8 @@
 {{/*
-nodepool custom resource template (compatible with karpenter v1.5.0)
+NodePool custom resource template for Karpenter v1.5.x
+- Uses stable API: karpenter.sh/v1
+- Kubelet configuration moved to EC2NodeClass (v1.5 requirement)
+- Supports all v1.5 disruption features and budgets
 */}}
 
 {{- range $key, $value := .Values.nodePool }}
@@ -46,13 +49,11 @@ spec:
       requirements:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .kubelet }}
-      kubelet:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{/*- NOTE: In Karpenter v1.5, kubelet configuration moved to EC2NodeClass spec */}}
+      {{/*- Kubelet configuration in NodePool is no longer supported */}}
   {{- if .disruption }}
-  {{- with .disruption }}
   disruption: 
+    {{- with .disruption }}
     consolidationPolicy: {{ default "WhenEmptyOrUnderutilized" .consolidationPolicy }}
     {{- with .consolidateAfter }}
     consolidateAfter: {{ . | quote }}
@@ -61,7 +62,7 @@ spec:
     budgets:
       {{- toYaml . | nindent 6 }}
     {{- end }}
-  {{- end }}
+    {{- end }}
   {{- end }}
   {{- if .limits }}
   limits:

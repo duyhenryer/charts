@@ -1,10 +1,10 @@
 apiVersion: v2
 name: karpenter-nodepool
-description: A Helm chart for Karpenter, it will create the NodePool and the Ec2NodeClass.
+description: A Helm chart for Karpenter v1.5.x, creates NodePool and EC2NodeClass resources with full v1.5 API support.
 
 type: application
-version: 1.5.1
-appVersion: 1.5.0
+version: 1.5.4 # Match Karpenter version
+appVersion: 1.5.4 # Match Karpenter version
 keywords:
   - node
   - autoscaling
