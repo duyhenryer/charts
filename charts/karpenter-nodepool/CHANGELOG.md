@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## v1.5.4
+## v1.0.0
 
 ![Helm: v3](https://img.shields.io/badge/Helm-v3.14%2B-informational?color=informational&logo=helm) ![Karpenter: v1.5.4](https://img.shields.io/badge/Karpenter-v1.5.4-success?color=success&logo=kubernetes)
 

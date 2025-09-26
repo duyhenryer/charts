@@ -1,4 +1,5 @@
-name: Release Charts
+name: Release Helm Charts
+run-name: 📦 Release Helm Charts
 
 on:
   push:
