@@ -3,6 +3,7 @@ run-name: 🧹 Clean old workflow runs
 on:
   schedule:
     - cron: '0 0 * * MON'  # Run weekly, at 00:00 on Monday.
+  workflow_dispatch:
 
 jobs:
   del_runs:
