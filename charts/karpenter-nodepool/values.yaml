@@ -14,7 +14,7 @@ globalLabels: {}
 globalAnnotations: {}
 
 nodePool:
-  al2021111111111:
+  default:
     # Labels are arbitrary key-values that are applied to all nodes
     # WARNING: Cannot use restricted domains like 'kubernetes.io' or 'node.kubernetes.io' 
     # These are reserved for Kubernetes/Karpenter internal use only
@@ -156,7 +156,7 @@ nodePool:
     weight: ~
 
 ec2NodeClass:
-  al2021111111111:
+  default:
     # Optional, dictates UserData generation and default block device mappings.
     # May be ommited when using an `alias` amiSelectorTerm, otherwise required.
     amiFamily: AL2
