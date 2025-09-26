@@ -6,6 +6,7 @@ NodePool custom resource template for Karpenter v1.5.x
 */}}
 
 {{- range $key, $value := .Values.nodePool }}
+{{- with $value }}
 ---
 apiVersion: karpenter.sh/v1
 kind: NodePool
@@ -35,9 +36,9 @@ spec:
     spec:
       {{- with .nodeClassRef }}
       nodeClassRef:
-        group: {{ default "karpenter.k8s.aws" .group }}
-        kind: {{ default "EC2NodeClass" .kind }}
-        name: {{ default "default" .name }}
+        group: {{ .group | default "karpenter.k8s.aws" }}
+        kind: {{ .kind | default "EC2NodeClass" }}
+        name: {{ .name | default $key }}
       {{- end }}
       {{- with .taints }}
       taints:
@@ -47,7 +48,7 @@ spec:
       startupTaints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      expireAfter: {{ default "720h" .expireAfter | quote }}
+      expireAfter: {{ .expireAfter | default "720h" | quote }}
       {{- with .terminationGracePeriod }}
       terminationGracePeriod: {{ . | quote }}
       {{- end }}
@@ -60,7 +61,7 @@ spec:
   {{- if .disruption }}
   disruption: 
     {{- with .disruption }}
-    consolidationPolicy: {{ default "WhenEmptyOrUnderutilized" .consolidationPolicy }}
+    consolidationPolicy: {{ .consolidationPolicy | default "WhenEmptyOrUnderutilized" }}
     {{- with .consolidateAfter }}
     consolidateAfter: {{ . | quote }}
     {{- end }}
@@ -72,10 +73,11 @@ spec:
   {{- end }}
   {{- if .limits }}
   limits:
-    cpu: {{ default "100" .limits.cpu | quote }}
-    memory: {{ default "100Gi" .limits.memory | quote }}
+    cpu: {{ .limits.cpu | default "100" | quote }}
+    memory: {{ .limits.memory | default "100Gi" | quote }}
   {{- end }}
   {{- if .weight }}
   weight: {{ .weight }}
   {{- end }}
+{{- end }}
 {{- end }}
