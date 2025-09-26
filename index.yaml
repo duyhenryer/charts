@@ -58,6 +58,32 @@ entries:
     urls:
     - https://github.com/duyhenryer/charts/releases/download/karpenter-nodepool-1.5.1/karpenter-nodepool-1.5.1.tgz
     version: 1.5.1
+  - apiVersion: v2
+    appVersion: 1.5.4
+    created: "2025-09-26T07:46:27.747090612Z"
+    description: A Helm chart for Karpenter v1.5.x, creates NodePool and EC2NodeClass
+      resources with full v1.5 API support.
+    digest: 3a01d856c40cc38c652febbd374affbef74db2f1779d82d10d3d133816dd405a
+    home: https://duyhenryer.github.io/charts/
+    icon: https://repository-images.githubusercontent.com/278480393/dab059c8-caa1-4b55-aaa7-3d30e47a5616
+    keywords:
+    - node
+    - autoscaling
+    - karpenter
+    - nodepool
+    - ec2nodeclass
+    maintainers:
+    - email: hello@duyne.me
+      name: Duy nè
+      url: https://duyne.me
+    name: karpenter-nodepool
+    sources:
+    - https://github.com/duyhenryer/charts
+    - https://karpenter.sh/
+    type: application
+    urls:
+    - https://github.com/duyhenryer/charts/releases/download/karpenter-nodepool-1.0.0/karpenter-nodepool-1.0.0.tgz
+    version: 1.0.0
   log-generator:
   - apiVersion: v2
     appVersion: 1.0.0
@@ -141,4 +167,4 @@ entries:
     urls:
     - https://github.com/duyhenryer/charts/releases/download/log-generator-0.1.0/log-generator-0.1.0.tgz
     version: 0.1.0
-generated: "2025-09-26T04:22:29.638644358Z"
+generated: "2025-09-26T07:46:27.97749063Z"
