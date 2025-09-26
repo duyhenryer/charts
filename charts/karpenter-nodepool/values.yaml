@@ -1,11 +1,5 @@
 # Default values for karpenter-nodepool.
 # This Helm chart is compatible with Karpenter v1.5.x
-# 
-# Key v1.5 Changes:
-# - Kubelet configuration moved from NodePool to EC2NodeClass
-# - Uses stable APIs: karpenter.sh/v1 and karpenter.k8s.aws/v1
-# - Supports new AMI alias format (e.g., al2@latest)
-# - Enhanced disruption budgets with scheduling support
 
 nameOverride: ""
 
@@ -13,8 +7,6 @@ globalLabels: {}
 
 globalAnnotations: {}
 
-# NodePool configurations - define your NodePools here
-# All configuration below is just examples - customize in your HelmRelease
 nodePool: {}
 # Example NodePool configuration:
 # default:
@@ -155,8 +147,6 @@ nodePool: {}
 #     Example: weight: 10
 #   weight: 10
 
-# EC2NodeClass configurations - define your EC2NodeClasses here
-# All configuration below is just examples - customize in your HelmRelease
 ec2NodeClass: {}
 # Example EC2NodeClass configuration:
 # default:
