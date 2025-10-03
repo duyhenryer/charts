@@ -1,0 +1,74 @@
+image:
+  repository: registry.k8s.io/kubectl
+  tag: "v1.34.1"
+  pullPolicy: IfNotPresent
+
+# CronJob schedule https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax
+# Defaults to once every Monday on 07:00 AM (once per week)
+schedule: "0 7 * * 1"
+
+# How much completed jobs to keep in each state
+successfulJobsHistoryLimit: 3
+failedJobsHistoryLimit: 3
+
+# https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/
+# Defaults to 86400 seconds = 1d
+ttlSecondsAfterFinished: 86400
+
+# Pod cleanup targets (enable the ones you want to cleanup)
+# Note: Multiple targets will be cleaned up separately
+targets:
+  # Cleanup failed pods
+  failed:
+    enabled: true
+    fieldSelector: "status.phase=Failed"
+  # Cleanup evicted pods (out of resources, node pressure, etc.)
+  evicted:
+    enabled: false
+    fieldSelector: "status.reason=Evicted"
+  # Cleanup succeeded pods older than certain time
+  succeeded:
+    enabled: false
+    fieldSelector: "status.phase=Succeeded"
+
+# Cleanup options
+cleanup:
+  # Dry run mode - logs what would be deleted without actually deleting
+  dryRun: false
+  # Grace period in seconds (0 = force delete immediately)
+  gracePeriod: 0
+  # Wait for deletion to complete
+  wait: false
+
+# Node selector for pod scheduling
+nodeSelector: {}
+# Example:
+#   node-role.kubernetes.io/worker: "true"
+
+# Tolerations for pod scheduling
+tolerations: []
+# Example:
+#   - key: "node-role.kubernetes.io/master"
+#     operator: "Exists"
+#     effect: "NoSchedule"
+
+# Affinity for pod scheduling
+affinity: {}
+# Example:
+#   nodeAffinity:
+#     requiredDuringSchedulingIgnoredDuringExecution:
+#       nodeSelectorTerms:
+#       - matchExpressions:
+#         - key: node-type
+#           operator: In
+#           values:
+#           - maintenance
+
+# Resources for containers started by CronJob
+resources:
+  requests:
+    cpu: 100m
+    memory: 100Mi
+  limits:
+    cpu: 100m
+    memory: 100Mi

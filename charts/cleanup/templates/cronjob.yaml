@@ -1,0 +1,106 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ $.Release.Name }}
+  name: {{ $.Release.Name }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  schedule: {{ $.Values.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: {{ $.Values.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ $.Values.failedJobsHistoryLimit }}
+  jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ $.Release.Name }}
+    spec:
+      ttlSecondsAfterFinished: {{ $.Values.ttlSecondsAfterFinished }}
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: {{ $.Release.Name }}
+        spec:
+          securityContext:
+            runAsUser: 1000
+            runAsNonRoot: true
+            fsGroup: 1000
+          automountServiceAccountToken: true
+          containers:
+            - image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+              name: {{ $.Release.Name }}
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  echo "=== Pod Cleanup Started at $(date) ==="
+                  {{- if $.Values.cleanup.dryRun }}
+                  echo "⚠️  Mode: DRY RUN (no pods will be deleted)"
+                  {{- end }}
+                  
+                  TOTAL_CLEANED=0
+                  
+                  {{- range $name, $target := $.Values.targets }}
+                  {{- if $target.enabled }}
+                  echo ""
+                  echo "--- Cleaning {{ $name }} pods ---"
+                  echo "Field Selector: {{ $target.fieldSelector }}"
+                  
+                  # Build delete command
+                  DELETE_CMD="kubectl delete pods -A --field-selector={{ $target.fieldSelector }}"
+                  {{- if $.Values.cleanup.dryRun }}
+                  DELETE_CMD="$DELETE_CMD --dry-run=client"
+                  {{- end }}
+                  {{- if $.Values.cleanup.wait }}
+                  DELETE_CMD="$DELETE_CMD --wait=true"
+                  {{- end }}
+                  DELETE_CMD="$DELETE_CMD --grace-period={{ $.Values.cleanup.gracePeriod }}"
+                  
+                  # Show pods to be deleted
+                  echo "Pods matching criteria:"
+                  kubectl get pods -A --field-selector={{ $target.fieldSelector }} 2>/dev/null || echo "No pods found"
+                  
+                  # Count pods
+                  COUNT=$(kubectl get pods -A --field-selector={{ $target.fieldSelector }} --no-headers 2>/dev/null | wc -l)
+                  echo "Total {{ $name }} pods to cleanup: $COUNT"
+                  
+                  # Execute cleanup
+                  if [ "$COUNT" -gt 0 ]; then
+                    echo "Executing: $DELETE_CMD"
+                    eval $DELETE_CMD
+                    echo "✓ Cleaned up $COUNT {{ $name }} pods"
+                    TOTAL_CLEANED=$((TOTAL_CLEANED + COUNT))
+                  else
+                    echo "No {{ $name }} pods to cleanup"
+                  fi
+                  {{- end }}
+                  {{- end }}
+                  
+                  echo ""
+                  echo "=== Summary ==="
+                  echo "Total pods cleaned: $TOTAL_CLEANED"
+                  echo "=== Job Finished at $(date) ==="
+              resources:
+                {{- toYaml $.Values.resources | nindent 16 }}
+              imagePullPolicy: IfNotPresent
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                runAsNonRoot: true
+                capabilities:
+                  drop:
+                    - ALL
+          restartPolicy: OnFailure
+          serviceAccountName: {{ $.Release.Name }}
+          {{- with $.Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $.Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $.Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
