@@ -1,0 +1,21 @@
+apiVersion: v2
+name: cleanup
+description: A Helm chart for cleanup failed/terminated pods in Kubernetes
+type: application
+
+version: 1.0.0
+
+keywords:
+  - cleanup
+  - cronjob
+  - pods
+  - kubernetes
+
+home: https://duyhenryer.github.io/charts/
+
+maintainers:
+  - name: Duy nè
+    email: hello@duyne.me
+    url: https://duyne.me
+
+appVersion: "1.16.0"
