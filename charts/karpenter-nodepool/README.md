@@ -1,8 +1,8 @@
 # karpenter-nodepool
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.5.4](https://img.shields.io/badge/AppVersion-1.5.4-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.6.0](https://img.shields.io/badge/AppVersion-1.6.0-informational?style=flat-square)
 
-A Helm chart for Karpenter v1.5.x, creates NodePool and EC2NodeClass resources with full v1.5 API support.
+A Helm chart for Karpenter v1.6.x, creates NodePool and EC2NodeClass resources with full v1.6 API support.
 
 **Homepage:** <https://duyhenryer.github.io/charts/>
 
@@ -16,6 +16,7 @@ A Helm chart for Karpenter v1.5.x, creates NodePool and EC2NodeClass resources w
 
 * <https://github.com/duyhenryer/charts>
 * <https://karpenter.sh/>
+* <https://github.com/kubernetes-sigs/karpenter>
 
 ## Values
 

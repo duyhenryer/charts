@@ -1,8 +1,8 @@
 {{/*
-EC2NodeClass custom resource template for Karpenter v1.5.x
+EC2NodeClass custom resource template for Karpenter v1.6.x
 - Uses stable API: karpenter.k8s.aws/v1  
-- Includes kubelet configuration (moved from NodePool in v1.5)
-- Supports all v1.5 AWS-specific features and security options
+- Includes kubelet configuration (moved from NodePool in v1.5+)
+- Supports v1.6 AWS-specific features and security options
 */}}
 
 {{- range $key, $value := .Values.ec2NodeClass }}

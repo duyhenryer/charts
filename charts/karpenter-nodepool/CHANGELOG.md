@@ -8,6 +8,40 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## v1.1.0
+
+![Helm: v3](https://img.shields.io/badge/Helm-v3.14%2B-informational?color=informational&logo=helm) ![Karpenter: v1.6.3](https://img.shields.io/badge/Karpenter-v1.6.3-success?color=success&logo=kubernetes)
+
+> **📖 Reference**: [Karpenter v1.6 Getting Started guide](https://karpenter.sh/v1.6/getting-started/)
+
+### Key Changes
+
+- Chart metadata bumped to version 1.1.0; appVersion set to 1.6.0
+- Values and templates updated for Karpenter v1.6 semantics
+  - NodePool: disruption budgets notes for cron `schedule` and `duration`
+  - Requirements: retain `minValues` pass-through
+  - EC2NodeClass: clarify `alias` AMI selection and IMDSv2 defaults; `instanceStorePolicy`, `associatePublicIPAddress`, `detailedMonitoring`, and `kubelet` remain pass-through
+- Documentation comments refreshed to v1.6 across templates and values
+
+### Compatibility
+
+- APIs remain stable: `karpenter.sh/v1` and `karpenter.k8s.aws/v1`
+- Kubelet configuration continues to live on `EC2NodeClass` (v1.5+)
+
+### Notes
+
+- Review NodePool `requirements` and consider `minValues` where useful
+- Consider explicitly setting `associatePublicIPAddress` and `detailedMonitoring` if desired
+- No spec moves needed; kubelet stays under `EC2NodeClass.spec.kubelet`
+
+Verified against Karpenter patch releases:
+- v1.6.1 (Chores)
+- v1.6.2 (Fix: allow termination for drifted nodes when consolidation disabled)
+- v1.6.3 (Fix: support arbitrary reserved capacity labels for drift)
+No chart template changes required.
+
+---
+
 ## v1.0.0
 
 ![Helm: v3](https://img.shields.io/badge/Helm-v3.14%2B-informational?color=informational&logo=helm) ![Karpenter: v1.5.4](https://img.shields.io/badge/Karpenter-v1.5.4-success?color=success&logo=kubernetes)

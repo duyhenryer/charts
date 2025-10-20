@@ -1,5 +1,5 @@
 # Default values for karpenter-nodepool.
-# This Helm chart is compatible with Karpenter v1.5.x
+# This Helm chart is compatible with Karpenter v1.6.x
 
 nameOverride: ""
 
@@ -64,9 +64,8 @@ nodePool: {}
 #     Operators { In, NotIn, Exists, DoesNotExist, Gt, and Lt } are supported.
 #     https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#operators
 #     Requirements constrain the parameters of provisioned nodes
-#     Karpenter v1.5 RECOMMENDED requirements for generic workloads:
+#     Karpenter v1.6 requirements for generic workloads:
 #   requirements:
-#     # RECOMMENDED v1.5 requirements for most use-cases:  
 #     - key: "kubernetes.io/arch"
 #       operator: In
 #       values: ["amd64"]
@@ -101,7 +100,7 @@ nodePool: {}
 #     You can choose to disable expiration entirely by setting the string value 'Never' here
 #   expireAfter: 720h
 #
-#     NOTE: In Karpenter v1.5, Kubelet configuration has been MOVED to EC2NodeClass spec
+#     NOTE: In Karpenter v1.5+, Kubelet configuration has been MOVED to EC2NodeClass spec
 #     This section is kept empty for v1.5 compatibility. Configure kubelet settings in ec2NodeClass section below.
 #     Keeping this field for backward compatibility with chart structure
 #   kubelet: {}
@@ -111,7 +110,7 @@ nodePool: {}
 #     like rolling Nodes due to them hitting their maximum lifetime (expiry) or scaling down nodes to reduce cluster cost
 #   disruption:
 #     # Describes which types of Nodes Karpenter should consider for consolidation
-#     # Valid values in Karpenter v1.5:
+#     # Valid values in Karpenter v1.6:
 #     # - 'WhenEmpty': Only consolidate nodes that contain no workload pods (except daemonsets)
 #     # - 'WhenEmptyOrUnderutilized': Consolidate both empty and underutilized nodes (DEFAULT)
 #     # - 'Never': Disable consolidation entirely
@@ -124,7 +123,7 @@ nodePool: {}
 #     # Examples: "30s", "5m", "1h"
 #     consolidateAfter: 0s
 #     
-#     # Optional: Disruption budgets to rate-limit voluntary disruptions
+#     # Optional: Disruption budgets to rate-limit voluntary disruptions (v1.6 supports cron schedule and duration)
 #     # If undefined, defaults to one budget with "nodes: 10%"
 #     # budgets:
 #     #   - nodes: "10%"              # Allow up to 10% of nodes to be disrupted
@@ -185,9 +184,9 @@ ec2NodeClass: {}
 #   
 #     Each term in the array of amiSelectorTerms is ORed together
 #     Within a single term, all conditions are ANDed
-#     NEW in v1.5: Recommended to use 'alias' for automatic EKS-optimized AMI selection
+#     v1.6: Recommended to use 'alias' for automatic EKS-optimized AMI selection (latest or pinned)
 #   amiSelectorTerms:
-#     # RECOMMENDED v1.5 approach - automatic EKS AMI selection:
+#     # v1.6 approach - automatic EKS AMI selection:
 #     - alias: al2@latest          # Latest Amazon Linux 2 EKS AMI
 #     # - alias: al2023@latest       # Latest Amazon Linux 2023 EKS AMI  
 #     # - alias: bottlerocket@latest # Latest Bottlerocket EKS AMI
