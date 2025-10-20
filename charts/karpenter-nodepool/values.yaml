@@ -279,3 +279,49 @@ ec2NodeClass: {}
 #     cpuCFSQuota: true
 #     podsPerCore: 2
 #     maxPods: 110
+#
+#     Overprovisioning: per-nodepool dummy pods for fast scaling
+#     Deploy dummy pods with low priority to maintain spare capacity for instant workload scaling
+#     Each nodepool can have independent overprovisioning configuration
+#   overprovisioning:
+#     enabled: false
+#     
+#     # Number of dummy pods (typically equals desired number of spare nodes)
+#     replicas: 3
+#     
+#     # PriorityClass for dummy pods (low priority so real workloads can evict them)
+#     priorityClassName: overprovisioning
+#     priorityValue: -1000
+#     
+#     # Resource requests per dummy pod
+#     # Recommendation: Set to average pod size in your cluster
+#     resources:
+#       requests:
+#         cpu: "1"
+#         memory: "2Gi"
+#     
+#     # Prevent Karpenter from consolidating nodes running dummy pods
+#     # Trade-off:
+#     #   - doNotDisrupt: true  → Nodes always ready, but run 24/7 (higher cost)
+#     #   - doNotDisrupt: false → Save cost when idle, but may lose spare capacity (slower scaling)
+#     # Default: false (cost optimization)
+#     doNotDisrupt: false
+#     
+#     # Optional: tolerations to match nodepool taints
+#     # Example: if nodepool has taint "workload=special:NoSchedule"
+#     tolerations: []
+#     #   - key: "workload"
+#     #     operator: "Equal"
+#     #     value: "special"
+#     #     effect: "NoSchedule"
+#     
+#     # Optional: topology spread for AZ distribution
+#     # Distribute dummy pods across availability zones
+#     topologySpreadConstraints: []
+#     #   - maxSkew: 1
+#     #     topologyKey: topology.kubernetes.io/zone
+#     #     whenUnsatisfiable: DoNotSchedule
+#     
+#     # Optional: additional pod annotations
+#     annotations: {}
+

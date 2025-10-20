@@ -1,0 +1,27 @@
+{{/*
+PriorityClass for overprovisioning pods (low priority for eviction by real workloads)
+Creates one PriorityClass per nodepool with overprovisioning enabled
+*/}}
+{{- $priorityClasses := dict }}
+{{- range $nodePoolName, $nodePoolConfig := .Values.nodePool }}
+{{- if and $nodePoolConfig.overprovisioning $nodePoolConfig.overprovisioning.enabled }}
+{{- $pcName := $nodePoolConfig.overprovisioning.priorityClassName | default "overprovisioning" }}
+{{- if not (hasKey $priorityClasses $pcName) }}
+{{- $_ := set $priorityClasses $pcName (dict "name" $pcName "value" ($nodePoolConfig.overprovisioning.priorityValue | default -1000)) }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- range $pcName, $pcConfig := $priorityClasses }}
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: {{ $pcName }}
+  labels:
+    {{- include "karpenter-nodepool.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: overprovisioning
+value: {{ $pcConfig.value }}
+globalDefault: false
+description: "Low priority for overprovisioning pods to ensure fast scaling. Real workloads will evict these pods when resources are needed."
+{{- end }}
+
