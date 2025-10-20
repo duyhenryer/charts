@@ -1,8 +1,8 @@
 {{/*
-NodePool custom resource template for Karpenter v1.5.x
+NodePool custom resource template for Karpenter v1.6.x
 - Uses stable API: karpenter.sh/v1
-- Kubelet configuration moved to EC2NodeClass (v1.5 requirement)
-- Supports all v1.5 disruption features and budgets
+- Kubelet configuration moved to EC2NodeClass (v1.5+ requirement)
+- Supports v1.6 disruption features and budgets (cron schedule & duration)
 */}}
 
 {{- range $key, $value := .Values.nodePool }}
