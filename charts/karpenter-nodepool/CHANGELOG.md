@@ -8,6 +8,72 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## v1.2.0
+
+![Helm: v3](https://img.shields.io/badge/Helm-v3.14%2B-informational?color=informational&logo=helm) ![Karpenter: v1.6.3](https://img.shields.io/badge/Karpenter-v1.6.3-success?color=success&logo=kubernetes)
+
+> **📖 Reference**: [Karpenter v1.6 Getting Started guide](https://karpenter.sh/v1.6/getting-started/)
+
+⚠️ **BREAKING CHANGE: Per-NodePool Overprovisioning**
+
+### Breaking Changes
+
+- **Overprovisioning configuration moved from top-level to per-nodepool**
+- Each nodepool can now have independent overprovisioning settings
+- Automatic nodeAffinity injection to bind dummy pods to specific nodepools
+
+### What's New
+
+- **Per-nodepool overprovisioning**: Configure overprovisioning independently for each nodepool
+- **Auto-binding**: Dummy pods automatically scheduled to their target nodepool via nodeAffinity
+- **Tolerations support**: Add tolerations to match nodepool taints
+- **TopologySpreadConstraints support**: Distribute dummy pods across AZs
+- **PriorityClass deduplication**: Multiple nodepools can share the same PriorityClass
+
+### Usage Example
+
+```yaml
+nodePool:
+  general:
+    taints:
+      - key: workload
+        value: general
+        effect: NoSchedule
+    overprovisioning:
+      enabled: true
+      replicas: 2
+      tolerations:
+        - key: workload
+          value: general
+          effect: NoSchedule
+  
+  spot:
+    requirements:
+      - key: karpenter.sh/capacity-type
+        operator: In
+        values: ["spot"]
+    overprovisioning:
+      enabled: true
+      replicas: 5
+      doNotDisrupt: false  # Allow consolidation on spot
+```
+
+### Key Changes
+
+- Added `templates/priorityclass.yaml` with deduplication logic
+- Added `templates/deployment-overprovisioning.yaml` with per-nodepool loop
+- Extended `values.yaml` with per-nodepool overprovisioning configuration
+- Chart version bumped to 1.2.0 (breaking change release)
+
+### Trade-offs
+
+- `doNotDisrupt: true`: Nodes always ready (instant scaling) but run 24/7 (higher cost)
+- `doNotDisrupt: false`: Cost-optimized (Karpenter consolidates when idle) but may lose spare capacity
+
+Verified with Karpenter v1.6.1–v1.6.3.
+
+---
+
 ## v1.1.0
 
 ![Helm: v3](https://img.shields.io/badge/Helm-v3.14%2B-informational?color=informational&logo=helm) ![Karpenter: v1.6.3](https://img.shields.io/badge/Karpenter-v1.6.3-success?color=success&logo=kubernetes)

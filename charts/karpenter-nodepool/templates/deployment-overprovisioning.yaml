@@ -1,0 +1,60 @@
+{{/*
+Deployment for overprovisioning: creates dummy pods with low priority
+to maintain spare capacity for fast scaling
+Creates one Deployment per nodepool with overprovisioning enabled
+*/}}
+{{- range $nodePoolName, $nodePoolConfig := .Values.nodePool }}
+{{- if and $nodePoolConfig.overprovisioning $nodePoolConfig.overprovisioning.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "karpenter-nodepool.fullname" $ }}-overprovisioning-{{ $nodePoolName }}
+  labels:
+    {{- include "karpenter-nodepool.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: overprovisioning
+    karpenter.sh/nodepool: {{ $nodePoolName }}
+spec:
+  replicas: {{ $nodePoolConfig.overprovisioning.replicas | default 3 }}
+  selector:
+    matchLabels:
+      app: {{ include "karpenter-nodepool.fullname" $ }}-overprovisioning-{{ $nodePoolName }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "karpenter-nodepool.fullname" $ }}-overprovisioning-{{ $nodePoolName }}
+        karpenter.sh/nodepool: {{ $nodePoolName }}
+      annotations:
+        {{- if $nodePoolConfig.overprovisioning.doNotDisrupt }}
+        karpenter.sh/do-not-disrupt: "true"
+        {{- end }}
+        {{- with $nodePoolConfig.overprovisioning.annotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      priorityClassName: {{ $nodePoolConfig.overprovisioning.priorityClassName | default "overprovisioning" }}
+      terminationGracePeriodSeconds: 0
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: karpenter.sh/nodepool
+                operator: In
+                values: [{{ $nodePoolName }}]
+      {{- with $nodePoolConfig.overprovisioning.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $nodePoolConfig.overprovisioning.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: pause
+        image: registry.k8s.io/pause:3.9
+        resources:
+          {{- toYaml $nodePoolConfig.overprovisioning.resources | nindent 10 }}
+{{- end }}
+{{- end }}
+
