@@ -30,25 +30,6 @@ All notable changes to this project will be documented in this file.
 - **TopologySpreadConstraints support**: Distribute dummy pods across AZs
 - **PriorityClass deduplication**: Multiple nodepools can share the same PriorityClass
 
-### Migration Guide
-
-**Before (old structure)**:
-```yaml
-overprovisioning:
-  enabled: true
-  replicas: 3
-```
-
-**After (new structure)**:
-```yaml
-nodePool:
-  default:
-    overprovisioning:
-      enabled: true
-      replicas: 3
-      tolerations: []  # Match nodepool taints if any
-```
-
 ### Usage Example
 
 ```yaml
