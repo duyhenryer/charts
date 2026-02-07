@@ -55,6 +55,17 @@ entries:
     urls:
     - https://github.com/duyhenryer/charts/releases/download/cloudflared-0.2.1/cloudflared-0.2.1.tgz
     version: 0.2.1
+  cronjobs:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2026-02-07T16:15:29.711799388Z"
+    description: A Helm chart for Kubernetes
+    digest: e35886e5bce85917306f6c21fdea9e2df44e9945f8bb3db8a4033796ce281c72
+    name: cronjobs
+    type: application
+    urls:
+    - https://github.com/duyhenryer/charts/releases/download/cronjobs-0.1.0/cronjobs-0.1.0.tgz
+    version: 0.1.0
   karpenter-nodepool:
   - apiVersion: v2
     appVersion: 1.5.0
@@ -240,4 +251,4 @@ entries:
     urls:
     - https://github.com/duyhenryer/charts/releases/download/log-generator-0.1.0/log-generator-0.1.0.tgz
     version: 0.1.0
-generated: "2025-10-20T15:49:44.612495113Z"
+generated: "2026-02-07T16:15:29.909852528Z"
