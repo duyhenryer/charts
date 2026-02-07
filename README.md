@@ -36,6 +36,7 @@ helm registry login ghcr.io
 | [cloudflared](./charts/cloudflared) | 0.2.1 | 2024.11.0 | Deploy Cloudflare Tunnel for secure ingress |
 | [karpenter-nodepool](./charts/karpenter-nodepool) | 1.5.1 | 1.5.0 | Karpenter NodePool and EC2NodeClass resources |
 | [log-generator](./charts/log-generator) | 0.1.1 | latest | Configurable log generator for testing and benchmarking |
+| [cronjobs](./charts/cronjobs) | 0.1.0 | 1.16.0 | Generic CronJobs deployment chart |
 
 ## Quick Start
 
@@ -79,6 +80,16 @@ helm install log-generator duyhenryer/log-generator
 helm install log-generator duyhenryer/log-generator -f my-values.yaml
 ```
 
+### cronjobs - Generic CronJobs
+
+```bash
+# Install with default values
+helm install my-cronjobs duyhenryer/cronjobs
+
+# Install with custom values file
+helm install my-cronjobs duyhenryer/cronjobs -f values.yaml
+```
+
 ## Using OCI Registry
 
 ```bash
@@ -90,4 +101,7 @@ helm install karpenter-nodes oci://ghcr.io/duyhenryer/charts/karpenter-nodepool 
 
 # Pull and install log-generator
 helm install log-generator oci://ghcr.io/duyhenryer/charts/log-generator --version 0.1.3
+
+# Pull and install cronjobs
+helm install my-cronjobs oci://ghcr.io/duyhenryer/charts/cronjobs --version 0.1.0
 ```
