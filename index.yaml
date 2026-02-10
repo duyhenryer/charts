@@ -58,6 +58,16 @@ entries:
   cronjobs:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2026-02-10T08:38:52.608302942Z"
+    description: A Helm chart for Kubernetes
+    digest: 1fc0946d50043aea156866a58391441542a632c090913569dff0845b9938e777
+    name: cronjobs
+    type: application
+    urls:
+    - https://github.com/duyhenryer/charts/releases/download/cronjobs-0.2.1/cronjobs-0.2.1.tgz
+    version: 0.2.1
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2026-02-10T07:42:37.273925521Z"
     description: A Helm chart for Kubernetes
     digest: 61f9309da5454d571ccc55e71daff5399b614ba0cbaaab2197d13554584e43ed
@@ -261,4 +271,4 @@ entries:
     urls:
     - https://github.com/duyhenryer/charts/releases/download/log-generator-0.1.0/log-generator-0.1.0.tgz
     version: 0.1.0
-generated: "2026-02-10T07:42:37.273949631Z"
+generated: "2026-02-10T08:38:52.608342145Z"
