@@ -1,4 +1,5 @@
 {{- range $jobname, $job := .Values.jobs }}
+{{- if $job }}
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -85,4 +86,5 @@ spec:
           {{- end }}
   schedule: {{ $job.schedule | quote }}
   successfulJobsHistoryLimit: {{ $job.successfulJobsHistoryLimit }}
+{{- end }}
 {{- end }}

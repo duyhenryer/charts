@@ -34,6 +34,7 @@ and will be shared by all the job pods requiring it.
 {{- define "cronjobs.imageSecrets" -}}
     {{- $secrets := dict -}}
     {{- range $jobname, $job := .Values.jobs -}}
+        {{- if $job -}}
         {{- if hasKey $job "imagePullSecrets" -}}
             {{- range $ips := $job.imagePullSecrets -}}
                 {{- $userInfo := dict "username" $ips.username "password" $ips.password "auth" (printf "%s:%s" $ips.username $ips.password | b64enc) -}}
@@ -42,6 +43,7 @@ and will be shared by all the job pods requiring it.
                 {{- end -}}
                 {{- $_ := set $secrets $ips.registry $userInfo -}}
             {{- end -}}
+        {{- end -}}
         {{- end -}}
     {{- end -}}
     {{- if gt (len $secrets) 0 -}}
