@@ -3,7 +3,7 @@ apiVersion: sloth.slok.dev/v1
 kind: PrometheusServiceLevel
 metadata:
   name: {{ include "microservice.fullname" . }}
-  namespace: monitoring
+  namespace: {{ .Values.slo.namespace | default "monitoring" }}
   labels:
     {{- include "microservice.labels" . | nindent 4 }}
 spec:

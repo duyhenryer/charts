@@ -128,6 +128,7 @@ securityContext: {}
 # following Google SRE multi-window multi-burn-rate pattern.
 slo:
   enabled: false
+  namespace: "monitoring"  # Namespace where PrometheusServiceLevel CRD is created (where Sloth operator watches)
   team: "platform"
   env: "monitoring"
   availability:
