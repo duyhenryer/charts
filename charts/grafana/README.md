@@ -1,130 +1,32 @@
-# Grafana Dashboard Helm Chart
+# grafana
 
-Helm chart for deploying Grafana dashboards with ConfigMap and GrafanaDashboard CRD support. This chart follows the CloudNativePG pattern for single-dashboard charts, ensuring ConfigMap and CRD are always in sync.
+![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0](https://img.shields.io/badge/AppVersion-1.0.0-informational?style=flat-square)
 
-## Features
+Helm chart for deploying Grafana dashboards with ConfigMap and GrafanaDashboard CRD support. Follows CloudNativePG pattern for single-dashboard charts.
 
-- **Automatic ConfigMap Creation**: Creates ConfigMap from dashboard JSON file automatically
-- **GrafanaDashboard CRD Support**: Creates GrafanaDashboard CRD that references the ConfigMap
-- **Single Source of Truth**: ConfigMap and CRD are always in sync (no manual synchronization)
-- **Large File Support**: Handles large JSON files (~150KB+) without annotation size limit errors
-- **Helm Native**: Uses Helm's `.Files.Get` to load dashboard JSON, avoiding kustomization issues
-- **Backward Compatible**: Default values match current setup (same ConfigMap/CRD names)
-- **OCI Registry Ready**: Can be packaged and published to OCI registries
+## Maintainers
 
-## Prerequisites
+| Name | Email | Url |
+| ---- | ------ | --- |
+| duynhne |  | <https://github.com/duynhne> |
 
-- Kubernetes 1.19+
-- Helm 3.0+
-- Grafana Operator installed and running
-- Grafana instance with labels matching `instanceSelector.matchLabels` (default: `dashboards: grafana`)
+## Values
 
-## Installation
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| crdName | string | `"microservices-monitoring"` | GrafanaDashboard CRD name Default: microservices-monitoring (matches current setup) When to change: If you want a different CRD name Example: "my-dashboard" |
+| fullnameOverride | string | `""` | Override the full name of the chart |
+| grafanaDashboard | object | `{"annotations":{},"configMapName":"grafana-dashboard-main","datasources":[{"datasourceName":"Prometheus","inputName":"DS_PROMETHEUS"}],"fileName":"microservices-dashboard.json","folder":"Observability","labels":{"grafana_dashboard":"1"}}` | Grafana dashboard configuration Follows CloudNativePG pattern for consistency |
+| grafanaDashboard.annotations | object | `{}` | Annotations that ConfigMap can have Default: {} (empty) When to change: To add custom annotations for metadata Example: { description: "Production monitoring dashboard" } |
+| grafanaDashboard.configMapName | string | `"grafana-dashboard-main"` | The name of the ConfigMap containing the dashboard JSON Default: grafana-dashboard-main (matches current setup) When to change: If you want a different ConfigMap name Example: "my-dashboard-configmap" |
+| grafanaDashboard.datasources | list | `[{"datasourceName":"Prometheus","inputName":"DS_PROMETHEUS"}]` | Datasource mappings for dashboard template variables Maps template variable names in dashboard JSON to Grafana datasource names Default: DS_PROMETHEUS -> Prometheus (matches current setup) When to change: If dashboard uses different datasources or variable names Example:   - inputName: DS_PROMETHEUS     datasourceName: Prometheus   - inputName: DS_LOKI     datasourceName: Loki |
+| grafanaDashboard.fileName | string | `"microservices-dashboard.json"` | The name of the JSON file in the chart's files/ directory Default: microservices-dashboard.json (matches current setup) When to change: If using a different dashboard file Example: "custom-dashboard.json" |
+| grafanaDashboard.folder | string | `"Observability"` | Folder name in Grafana UI where dashboard will appear Default: Observability (matches current setup) When to change: To organize dashboards in different folders Example: "Production", "Development", "Databases" |
+| grafanaDashboard.labels | object | `{"grafana_dashboard":"1"}` | Labels that ConfigMap should have Used by Grafana Operator for sidecar discovery (if enabled) Default: grafana_dashboard: "1" (matches CloudNativePG pattern) When to change: If using different label scheme Example: { grafana_dashboard: "1", environment: "production" } |
+| instanceSelector | object | `{"matchLabels":{"dashboards":"grafana"}}` | Grafana instance selector configuration Used in GrafanaDashboard CRD to match Grafana instance |
+| instanceSelector.matchLabels | object | `{"dashboards":"grafana"}` | Match labels for Grafana instance Default: dashboards: grafana (matches current setup) When to change: If Grafana instance has different labels Example: { dashboards: grafana, environment: production } |
+| nameOverride | string | `""` | Override the chart name |
+| namespace | string | `"monitoring"` | Namespace where ConfigMap and GrafanaDashboard CRD will be created Default: monitoring (matches current setup) When to change: If deploying to a different namespace Example: "observability" |
 
-### Basic Installation
-
-```bash
-helm install grafana charts/grafana --namespace monitoring
-```
-
-### Installation with Custom Values
-
-```bash
-helm install grafana charts/grafana \
-  --namespace monitoring \
-  --set namespace=observability \
-  --set grafanaDashboard.folder="Production"
-```
-
-### Installation from OCI Registry
-
-```bash
-# Install from OCI registry
-helm install grafana oci://ghcr.io/duyhenryer/charts/grafana \
-  --version 0.1.0 \
-  --namespace monitoring
-```
-
-## Helm Template Examples
-
-### Preview Rendered Templates
-
-```bash
-# Preview all rendered templates
-helm template grafana charts/grafana
-
-# Preview with debug output
-helm template grafana charts/grafana --debug
-```
-
-### Dry-Run Installation
-
-```bash
-# See what would be installed without actually installing
-helm install grafana charts/grafana --namespace monitoring --dry-run --debug
-```
-
-### Validate Chart
-
-```bash
-# Lint chart for errors (recommended)
-helm lint charts/grafana
-
-# Validate with custom values
-helm lint charts/grafana --set namespace=observability
-
-```
-
-### Template with Custom Values
-
-```bash
-# Override values inline
-helm template grafana charts/grafana \
-  --set namespace=observability \
-  --set grafanaDashboard.folder="Production" \
-  --set crdName=my-dashboard
-
-# Combine with values file
-helm template grafana charts/grafana \
-  -f custom-values.yaml \
-  --set grafanaDashboard.folder="Custom"
-```
-
-## Configuration
-
-See `values.yaml` for all available configuration options. Key parameters:
-
-- `namespace`: Namespace where resources will be created (default: `monitoring`)
-- `instanceSelector.matchLabels`: Labels to match Grafana instance (default: `dashboards: grafana`)
-- `grafanaDashboard.configMapName`: ConfigMap name (default: `grafana-dashboard-main`)
-- `grafanaDashboard.fileName`: Dashboard JSON file name (default: `microservices-dashboard.json`)
-- `grafanaDashboard.folder`: Folder in Grafana UI (default: `Observability`)
-- `grafanaDashboard.datasources`: Datasource mappings (default: Prometheus)
-
-## Chart Structure
-
-```
-charts/grafana/
-├── Chart.yaml              # Chart metadata
-├── values.yaml              # Default configuration
-├── values.schema.json       # JSON schema for values validation
-├── README.md                # This file
-├── templates/
-│   ├── _helpers.tpl         # Template helper functions
-│   ├── configmap.yaml       # ConfigMap template
-│   └── grafanadashboard.yaml # GrafanaDashboard CRD template
-└── files/
-    └── microservices-dashboard.json # Dashboard JSON file
-```
-
-## Upgrading
-
-```bash
-helm upgrade grafana charts/grafana --namespace monitoring
-```
-
-## Uninstalling
-
-```bash
-helm uninstall grafana --namespace monitoring
-```
+----------------------------------------------
+Autogenerated from chart metadata using [helm-docs v1.10.0](https://github.com/norwoodj/helm-docs/releases/v1.10.0)
