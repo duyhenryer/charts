@@ -15,13 +15,15 @@ helm upgrade --install auth charts/mop -f charts/mop/values/auth.yaml -n auth --
 
 ```bash
 # Install from OCI registry
-helm install auth oci://ghcr.io/duynhne/charts/mop \
-  --version 0.4.2 \
-  -f charts/mop/values/auth.yaml \
+helm install auth oci://ghcr.io/duyhenryer/charts/mop \
+  --version 0.7.0 \
+  --set name=auth \
+  --set image.repository=ghcr.io/duynhne/auth-service/auth \
+  --set image.tag=latest \
   -n auth --create-namespace
 ```
 
-**OCI Registry**: `oci://ghcr.io/duynhne/charts/mop`
+**OCI Registry**: `oci://ghcr.io/duyhenryer/charts/mop`
 
 ---
 
@@ -69,22 +71,14 @@ helm template auth charts/mop \
 
 ```
 charts/mop/
-├── Chart.yaml             # Chart metadata (version: 0.4.2)
+├── Chart.yaml             # Chart metadata (version: 0.7.0)
 ├── values.yaml            # Default values template
-├── values/                # Per-service value overrides
-│   ├── auth.yaml
-│   ├── user.yaml
-│   ├── product.yaml
-│   ├── cart.yaml
-│   ├── order.yaml
-│   ├── review.yaml
-│   ├── notification.yaml
-│   ├── shipping.yaml
-│   └── k6.yaml
+├── README.md
 └── templates/
     ├── _helpers.tpl       # Template helper functions
     ├── deployment.yaml    # Includes initContainer for migrations
     ├── service.yaml
+    ├── slo.yaml           # PrometheusServiceLevel CRD (when slo.enabled: true)
     └── NOTES.txt          # Post-installation notes
 ```
 

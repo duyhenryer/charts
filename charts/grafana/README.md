@@ -40,7 +40,7 @@ helm install grafana charts/grafana \
 
 ```bash
 # Install from OCI registry
-helm install grafana oci://ghcr.io/duynhne/charts/grafana \
+helm install grafana oci://ghcr.io/duyhenryer/charts/grafana \
   --version 0.1.0 \
   --namespace monitoring
 ```
