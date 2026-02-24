@@ -86,6 +86,28 @@ entries:
     urls:
     - https://github.com/duyhenryer/charts/releases/download/cronjobs-0.1.0/cronjobs-0.1.0.tgz
     version: 0.1.0
+  grafana:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2026-02-24T04:21:37.797234065Z"
+    description: Helm chart for deploying Grafana dashboards with ConfigMap and GrafanaDashboard
+      CRD support. Follows CloudNativePG pattern for single-dashboard charts.
+    digest: 19b6cb0a3651e52ff4361d5d66cc85443106703123d26c9783726c2eaabfd4e5
+    keywords:
+    - grafana
+    - dashboard
+    - monitoring
+    - observability
+    - configmap
+    - grafanadashboard
+    maintainers:
+    - name: duynhne
+      url: https://github.com/duynhne
+    name: grafana
+    type: application
+    urls:
+    - https://github.com/duyhenryer/charts/releases/download/grafana-0.1.0/grafana-0.1.0.tgz
+    version: 0.1.0
   karpenter-nodepool:
   - apiVersion: v2
     appVersion: 1.5.0
@@ -271,4 +293,24 @@ entries:
     urls:
     - https://github.com/duyhenryer/charts/releases/download/log-generator-0.1.0/log-generator-0.1.0.tgz
     version: 0.1.0
-generated: "2026-02-10T08:38:52.608342145Z"
+  mop:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2026-02-24T04:21:37.977057414Z"
+    description: A generic Helm chart for deploying Go microservices (Microservices
+      Observability Platform)
+    digest: 80144c39b359faa3794111c23111b00f060b4b4f17da9e622287e0bf8c94f8dd
+    keywords:
+    - microservice
+    - go
+    - monitoring
+    - prometheus
+    maintainers:
+    - name: duynhne
+      url: https://github.com/duynhne
+    name: mop
+    type: application
+    urls:
+    - https://github.com/duyhenryer/charts/releases/download/mop-0.7.0/mop-0.7.0.tgz
+    version: 0.7.0
+generated: "2026-02-24T04:21:37.977086308Z"
