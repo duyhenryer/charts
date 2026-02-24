@@ -37,6 +37,8 @@ helm registry login ghcr.io
 | [karpenter-nodepool](./charts/karpenter-nodepool) | 1.5.1 | 1.5.0 | Karpenter NodePool and EC2NodeClass resources |
 | [log-generator](./charts/log-generator) | 0.1.1 | latest | Configurable log generator for testing and benchmarking |
 | [cronjobs](./charts/cronjobs) | 0.1.0 | 1.16.0 | Generic CronJobs deployment chart |
+| [mop](./charts/mop) | 0.7.0 | 1.0.0 | Generic Helm chart for deploying Go microservices (Microservices Observability Platform) |
+| [grafana](./charts/grafana) | 0.1.0 | 1.0.0 | Grafana dashboards with ConfigMap and GrafanaDashboard CRD support |
 
 ## Quick Start
 
@@ -90,6 +92,30 @@ helm install my-cronjobs duyhenryer/cronjobs
 helm install my-cronjobs duyhenryer/cronjobs -f values.yaml
 ```
 
+### mop - Microservices Observability Platform
+
+```bash
+# Install a microservice with SLO enabled
+helm install auth duyhenryer/mop \
+  --set name=auth \
+  --set image.repository=ghcr.io/duynhne/auth-service/auth \
+  --set image.tag=latest \
+  --set slo.enabled=true \
+  --namespace auth
+
+# Lint with SLO
+helm lint charts/mop/ --set name=test --set slo.enabled=true
+```
+
+### grafana - Grafana Dashboard Chart
+
+```bash
+# Install a Grafana dashboard
+helm install my-dashboard duyhenryer/grafana \
+  --set dashboard.name=my-dashboard \
+  --set dashboard.folder=MyFolder
+```
+
 ## Using OCI Registry
 
 ```bash
@@ -104,4 +130,10 @@ helm install log-generator oci://ghcr.io/duyhenryer/charts/log-generator --versi
 
 # Pull and install cronjobs
 helm install my-cronjobs oci://ghcr.io/duyhenryer/charts/cronjobs --version 0.1.0
+
+# Pull and install mop
+helm install auth oci://ghcr.io/duyhenryer/charts/mop --version 0.7.0
+
+# Pull and install grafana dashboard
+helm install my-dashboard oci://ghcr.io/duyhenryer/charts/grafana --version 0.1.0
 ```
