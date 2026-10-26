@@ -33,7 +33,7 @@ jobs:
           
       # Publish charts to gh-pages branch
       - name: Publish charts to GitHub Pages
-        uses: helm/chart-releaser-action@fae9146b935c45c307b67c4495043ea3fd3e3355 #v1.7.0
+        uses: helm/chart-releaser-action@0a4a76cd0d743c104539192612dbc24a61c3e3c1 #v1.7.0
         with:
           config: .github/configs/cr.yaml
         env:
@@ -66,7 +66,7 @@ jobs:
           done
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f #v4.6.0
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 #v4.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
